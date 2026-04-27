@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Comprobante de Venta - XyberTechX</title>
+  <link rel="stylesheet" href="../css/estilos.css">
+  <link rel="stylesheet" href="../css/pos.css">
+</head>
+<body>
+
+<div class="ticket-premium-page">
+
+  <div class="ticket-document" id="ticketBox">
+
+    <header class="ticket-doc-header">
+      <div class="ticket-brand">
+        <img src="../img/logo 2.0.png" alt="XyberTechX">
+        <div>
+          <h1>XyberTechX Technology</h1>
+          <p>Tecnología que responde.</p>
+        </div>
+      </div>
+
+      <div class="ticket-doc-info">
+        <h2>Comprobante de Venta</h2>
+        <p><strong>N°:</strong> <span id="ticketId">---</span></p>
+        <p><strong>Fecha:</strong> <span id="ticketFecha">---</span></p>
+      </div>
+    </header>
+
+    <section class="ticket-company-info">
+      <p><strong>Contacto:</strong> 973 518 710</p>
+      <p><strong>Email:</strong> xybertechxtechnology@gmail.com</p>
+      <p><strong>Origen:</strong> POS</p>
+    </section>
+
+    <section class="ticket-table">
+      <div class="ticket-table-head">
+        <span>Producto</span>
+        <span>Cant.</span>
+        <span>Precio</span>
+        <span>Subtotal</span>
+      </div>
+
+      <div id="ticketProductos"></div>
+    </section>
+
+    <section class="ticket-summary">
+      <div>
+        <p>Gracias por confiar en XyberTechX Technology.</p>
+        <small>Este comprobante corresponde a una venta registrada en el sistema interno.</small>
+      </div>
+
+      <div class="ticket-total-box">
+        <span>Total</span>
+        <strong>S/<span id="ticketTotal">0.00</span></strong>
+      </div>
+    </section>
+
+    <footer class="ticket-footer">
+      <p>Soporte técnico · Ventas · Inventario · Tecnología</p>
+    </footer>
+
+  </div>
+
+  <div class="ticket-actions">
+    <button onclick="window.print()">Guardar / Imprimir PDF</button>
+    <a href="index.html">Nueva venta</a>
+  </div>
+
+</div>
+
+<script type="module" src="../js/pos/ticket.js"></script>
+
+</body>
+</html>

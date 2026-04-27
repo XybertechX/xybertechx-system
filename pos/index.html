@@ -11,13 +11,14 @@
 <div class="pos-layout">
 
   <aside class="pos-sidebar">
-    <img src="../img/logo 2.0.png" alt="XyberTechX" class="pos-logo">
+    <img src="../img/asesor de ventas.png" alt="XyberTechX" class="pos-logo">
     <h2>XyberTechX</h2>
     <p>POS de ventas</p>
 
     <nav>
       <a href="index.html" class="active">Nueva venta</a>
       <a href="historial.html">Historial</a>
+      <a href="devoluciones.html">Devoluciones</a>
       <a href="../login.html">Salir</a>
     </nav>
   </aside>
@@ -55,6 +56,19 @@
         <div class="carrito-total">
           <span>Total</span>
           <strong id="totalVenta">S/0.00</strong>
+        </div>
+
+        <div class="metodo-pago-box">
+          <label for="metodoPago">Método de pago</label>
+
+          <select id="metodoPago">
+            <option value="">Seleccionar método</option>
+            <option value="Efectivo">Efectivo</option>
+            <option value="Yape">Yape</option>
+            <option value="Plin">Plin</option>
+            <option value="Transferencia">Transferencia</option>
+            <option value="Tarjeta">Tarjeta</option>
+          </select>
         </div>
 
         <button id="btnCobrar" class="btn-cobrar">Cobrar venta</button>

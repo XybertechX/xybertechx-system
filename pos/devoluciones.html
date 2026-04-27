@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Devoluciones - XyberTechX</title>
+  <link rel="stylesheet" href="../css/estilos.css">
+  <link rel="stylesheet" href="../css/pos.css">
+</head>
+<body>
+
+<div class="pos-layout">
+
+  <aside class="pos-sidebar">
+    <img src="../img/asesor de ventas.png" alt="XyberTechX" class="pos-logo">
+    <h2>XyberTechX</h2>
+    <p>POS de ventas</p>
+
+    <nav>
+      <a href="index.html">Nueva venta</a>
+      <a href="historial.html">Historial</a>
+      <a href="devoluciones.html" class="active">Devoluciones</a>
+      <a href="../login.html">Salir</a>
+    </nav>
+  </aside>
+
+  <main class="pos-main">
+
+    <header class="pos-header">
+      <div>
+        <h1>Devoluciones</h1>
+        <p>Busca una venta y registra la devolución.</p>
+      </div>
+      <span class="pos-badge">Vendedor</span>
+    </header>
+
+    <section class="pos-content">
+      <div class="productos-panel" style="width: 100%;">
+        <div class="panel-title">
+          <h2>Ventas realizadas</h2>
+          <input type="text" id="buscarDevolucion" placeholder="Buscar venta...">
+        </div>
+
+        <div id="listaDevoluciones" class="productos-grid">
+          <p class="carrito-vacio">Cargando ventas...</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+</div>
+
+<script type="module" src="../js/pos/devoluciones.js"></script>
+
+</body>
+</html>

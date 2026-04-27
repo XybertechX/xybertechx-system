@@ -13,6 +13,7 @@ const buscarProducto = document.getElementById("buscarProducto");
 const carritoLista = document.getElementById("carritoLista");
 const totalVenta = document.getElementById("totalVenta");
 const btnCobrar = document.getElementById("btnCobrar");
+const metodoPago = document.getElementById("metodoPago");
 
 let productos = [];
 let carrito = [];
@@ -76,6 +77,7 @@ function agregarAlCarrito(idProducto) {
       alert("No hay más stock disponible.");
       return;
     }
+
     productoEnCarrito.cantidad++;
   } else {
     carrito.push({
@@ -171,6 +173,11 @@ async function procesarVenta() {
     return;
   }
 
+  if (!metodoPago.value) {
+    alert("Selecciona un método de pago.");
+    return;
+  }
+
   try {
     btnCobrar.disabled = true;
     btnCobrar.textContent = "Procesando...";
@@ -197,11 +204,12 @@ async function procesarVenta() {
       };
     });
 
-    await addDoc(collection(db, "ventas"), {
+    const ventaRef = await addDoc(collection(db, "ventas"), {
       fecha: new Date(),
       productos: productosVenta,
       total: total,
       ganancia: ganancia,
+      metodoPago: metodoPago.value,
       origen: "POS",
       estado: "completada"
     });
@@ -215,11 +223,12 @@ async function procesarVenta() {
       });
     }
 
-    alert("Venta registrada correctamente.");
-
     carrito = [];
+    metodoPago.value = "";
     renderCarrito();
-    await cargarProductos();
+
+    window.location.href = `ticket.html?id=${ventaRef.id}`;
+    return;
 
   } catch (error) {
     console.error("Error al procesar venta:", error);

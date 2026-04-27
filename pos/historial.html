@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Historial POS - XyberTechX</title>
+  <link rel="stylesheet" href="../css/estilos.css">
+  <link rel="stylesheet" href="../css/pos.css">
+</head>
+<body>
+
+<div class="pos-layout">
+
+  <aside class="pos-sidebar">
+    <img src="../img/logo 2.0.png" alt="XyberTechX" class="pos-logo">
+    <h2>XyberTechX</h2>
+    <p>Historial POS</p>
+
+    <nav>
+      <a href="index.html">Nueva venta</a>
+      <a href="historial.html" class="active">Historial</a>
+      <a href="devoluciones.html">Devoluciones</a>
+      <a href="../login.html">Salir</a>
+    </nav>
+  </aside>
+
+  <main class="pos-main">
+    <header class="pos-header">
+      <div>
+        <h1>Historial de Ventas</h1>
+        <p>Consulta ventas por fecha, método de pago y ticket.</p>
+      </div>
+      <span class="pos-badge">Vendedor</span>
+    </header>
+
+    <section class="productos-panel">
+
+      <div class="historial-filtros">
+        <div>
+          <label for="fechaInicio">Desde</label>
+          <input type="date" id="fechaInicio">
+        </div>
+
+        <div>
+          <label for="fechaFin">Hasta</label>
+          <input type="date" id="fechaFin">
+        </div>
+
+        <button id="btnFiltrarFechas">Buscar</button>
+        <button id="btnLimpiarFiltro" type="button">Limpiar</button>
+      </div>
+
+      <div id="historialPOS" class="historial-pos">
+        <p>Cargando ventas...</p>
+      </div>
+
+    </section>
+  </main>
+
+</div>
+
+<script type="module" src="../js/pos/historial.js"></script>
+
+</body>
+</html> 
