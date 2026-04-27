@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Inventario - XyberTechX</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="img/logo 2.0.png" alt="XyberTechX">
+      <div>
+        <h1>XyberTechX</h1>
+        <span>TECHNOLOGY</span>
+      </div>
+    </div>
+
+    <nav class="menu">
+      <a href="index.html">Dashboard</a>
+      <a class="active" href="inventario.html">Inventario</a>
+      <a href="ventas.html">Ventas</a>
+      <a href="reportes.html">Reportes</a>
+      <a href="boletas.html">Boletas</a>
+      <button onclick="logout()">Cerrar sesión</button>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <section class="topbar">
+      <div>
+        <h2>Inventario</h2>
+        <p>Gestiona productos, precios y stock de XyberTechX.</p>
+      </div>
+      <div class="user-box">Administrador</div>
+    </section>
+
+    <section class="card full">
+      <h3>Agregar Producto</h3>
+
+      <div class="form-row inventory-form">
+  <input id="nombre" placeholder="Producto">
+  <input id="categoria" placeholder="Categoría">
+  <input id="costo" type="number" placeholder="Precio costo">
+  <input id="precio" type="number" placeholder="Precio venta">
+  <input id="stock" type="number" placeholder="Stock">
+  <button onclick="agregarProducto()">Guardar</button>
+</div>
+    </section>
+
+    <section class="card full">
+      <h3>Lista de Productos</h3>
+      <ul id="lista"></ul>
+    </section>
+  </main>
+
+</div>
+
+<script type="module" src="js/auth.js"></script>
+<script type="module" src="js/logout.js"></script>
+<script type="module" src="js/inventario.js"></script>
+
+</body>
+</html>

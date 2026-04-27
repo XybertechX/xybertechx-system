@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - XyberTechX</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="img/logo 2.0.png" alt="XyberTechX">
+      <div>
+        <h1>XyberTechX</h1>
+        <span>TECHNOLOGY</span>
+      </div>
+    </div>
+
+    <nav class="menu">
+      <a class="active" href="index.html">Panel de control</a>
+      <a href="inventario.html">Inventario</a>
+      <a href="ventas.html">Ventas</a>
+      <a href="reportes.html">Reportes</a>
+      <a href="boletas.html">Boletas</a>
+      <button onclick="logout()">Cerrar sesión</button>
+    </nav>
+  </aside>
+
+  <main class="main">
+
+    <section class="topbar">
+  <div>
+    <h2>Centro de Operaciones XyberTechX</h2>
+    <p>Resumen operativo de XyberTechX Technology</p>
+  </div>
+  <div class="user-box">Administrador</div>
+</section>
+
+    <!-- 🔹 MÉTRICAS PRINCIPALES -->
+    <section class="grid">
+
+      <div class="card stat">
+        <div class="label">Ventas hoy</div>
+        <div class="value">S/ <span id="ventasHoy">0</span></div>
+      </div>
+
+      <div class="card stat">
+        <div class="label">Ganancia hoy</div>
+        <div class="value">S/ <span id="gananciaHoy">0</span></div>
+      </div>
+
+      <div class="card stat">
+        <div class="label">Ticket promedio</div>
+        <div class="value">S/ <span id="ticketHoy">0</span></div>
+      </div>
+
+      <div class="card stat">
+        <div class="label">Stock bajo</div>
+        <div class="value"><span id="stockBajo">0</span></div>
+      </div>
+
+    </section>
+
+    <!-- 🔹 ALERTA VISUAL -->
+    <section class="card full" id="alertaVentas">
+      <h3>Estado del día</h3>
+      <p id="mensajeVentas">Calculando...</p>
+    </section>
+
+    <!-- 🔹 COMPARACIÓN -->
+    <section class="card full">
+      <h3>Comparación vs ayer</h3>
+
+      <div class="grid" style="margin-top: 15px;">
+
+        <div class="card stat">
+          <div class="label">Ventas ayer</div>
+          <div class="value">S/ <span id="ventasAyer">0</span></div>
+        </div>
+
+        <div class="card stat">
+          <div class="label">Diferencia</div>
+          <div class="value">S/ <span id="diferenciaVentas">0</span></div>
+        </div>
+
+        <div class="card stat">
+          <div class="label">Variación</div>
+          <div class="value"><span id="variacionVentas">0%</span></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 🔹 ÚLTIMAS VENTAS -->
+    <section class="card full">
+      <h3>Últimas ventas</h3>
+      <ul id="ultimasVentas"></ul>
+    </section>
+    
+
+  </main>
+
+</div>
+
+<script type="module" src="js/auth.js"></script>
+<script type="module" src="js/logout.js"></script>
+<script type="module" src="js/dashboard.js"></script>
+
+</body>
+</html>

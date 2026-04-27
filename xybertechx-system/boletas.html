@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Boletas - XyberTechX</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="img/logo 2.0.png" alt="XyberTechX">
+      <div>
+        <h1>XyberTechX</h1>
+        <span>TECHNOLOGY</span>
+      </div>
+    </div>
+
+    <nav class="menu">
+      <a href="index.html">Panel de control</a>
+      <a href="inventario.html">Inventario</a>
+      <a href="ventas.html">Ventas</a>
+      <a href="reportes.html">Reportes</a>
+      <a class="active" href="boletas.html">Boletas</a>
+      <button onclick="logout()">Cerrar sesión</button>
+    </nav>
+  </aside>
+
+  <main class="main">
+
+    <section class="topbar">
+      <div>
+        <h2>Boletas y Cotizaciones</h2>
+        <p>Genera presupuestos técnicos personalizados para clientes.</p>
+      </div>
+      <div class="user-box">Administrador</div>
+    </section>
+
+    <!-- DATOS DEL CLIENTE -->
+    <section class="card full">
+      <h3>Datos del cliente</h3>
+
+      <div class="boleta-grid">
+        <input id="cliente" placeholder="Nombre del cliente">
+        <input id="telefono" placeholder="Teléfono">
+        <input id="fecha" type="date">
+        <select id="tipoCotizacion">
+          <option value="Servicio técnico">Servicio técnico</option>
+          <option value="Armado de PC">Armado de PC</option>
+          <option value="Mantenimiento empresarial">Mantenimiento empresarial</option>
+          <option value="Cotización general">Cotización general</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- AGREGAR ITEM -->
+    <section class="card full">
+      <h3>Agregar detalle</h3>
+
+      <div class="boleta-grid item-form">
+        <input id="descripcion" placeholder="Descripción del servicio, producto o material">
+        <input id="cantidad" type="number" placeholder="Cantidad">
+        <input id="precio" type="number" placeholder="Precio unitario">
+        <button onclick="agregarItem()">Agregar</button>
+      </div>
+    </section>
+
+    <!-- DETALLE -->
+    <section class="card full">
+      <h3>Detalle de cotización</h3>
+      <ul id="listaItems"></ul>
+    </section>
+
+    <!-- RESUMEN -->
+    <section class="card full">
+      <h3>Resumen</h3>
+
+      <div class="summary-row">
+        <span>Subtotal</span>
+        <strong>S/ <span id="subtotal">0.00</span></strong>
+      </div>
+
+      <div class="summary-row">
+        <span>Descuento</span>
+        <input id="descuento" type="number" placeholder="0" oninput="calcularTotales()">
+      </div>
+
+      <div class="summary-row profit">
+        <span>Total final</span>
+        <strong>S/ <span id="totalFinal">0.00</span></strong>
+      </div>
+
+      <button onclick="generarPDF()">Generar PDF</button>
+    </section>
+
+  </main>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script type="module" src="js/auth.js"></script>
+<script type="module" src="js/logout.js"></script>
+<script src="js/boletas.js"></script>
+
+</body>
+</html>
