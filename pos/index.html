@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>POS - XyberTechX</title>
+  <link rel="stylesheet" href="../css/estilos.css">
+  <link rel="stylesheet" href="../css/pos.css">
+</head>
+<body>
+
+<div class="pos-layout">
+
+  <aside class="pos-sidebar">
+    <img src="../img/logo 2.0.png" alt="XyberTechX" class="pos-logo">
+    <h2>XyberTechX</h2>
+    <p>POS de ventas</p>
+
+    <nav>
+      <a href="index.html" class="active">Nueva venta</a>
+      <a href="historial.html">Historial</a>
+      <a href="../login.html">Salir</a>
+    </nav>
+  </aside>
+
+  <main class="pos-main">
+
+    <header class="pos-header">
+      <div>
+        <h1>Punto de Venta</h1>
+        <p>Busca productos, arma el carrito y registra ventas.</p>
+      </div>
+      <span class="pos-badge">Vendedor</span>
+    </header>
+
+    <section class="pos-content">
+
+      <div class="productos-panel">
+        <div class="panel-title">
+          <h2>Productos</h2>
+          <input type="text" id="buscarProducto" placeholder="Buscar producto...">
+        </div>
+
+        <div id="listaProductos" class="productos-grid">
+          <!-- Productos desde Firebase -->
+        </div>
+      </div>
+
+      <div class="carrito-panel">
+        <h2>Carrito</h2>
+
+        <div id="carritoLista" class="carrito-lista">
+          <p class="carrito-vacio">No hay productos agregados.</p>
+        </div>
+
+        <div class="carrito-total">
+          <span>Total</span>
+          <strong id="totalVenta">S/0.00</strong>
+        </div>
+
+        <button id="btnCobrar" class="btn-cobrar">Cobrar venta</button>
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+<script type="module" src="../js/pos/pos.js"></script>
+
+</body>
+</html>

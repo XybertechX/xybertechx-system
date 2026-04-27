@@ -13,6 +13,22 @@ const historialVentas = document.getElementById("historialVentas");
 const totalUtilidad = document.getElementById("totalUtilidad");
 const totalInversion = document.getElementById("totalInversion");
 
+function formatearFecha(fecha) {
+  if (!fecha) return "Sin fecha";
+
+  if (fecha.toDate) {
+    return fecha.toDate().toLocaleDateString("es-PE");
+  }
+
+  const fechaConvertida = new Date(fecha);
+
+  if (isNaN(fechaConvertida.getTime())) {
+    return "Sin fecha";
+  }
+
+  return fechaConvertida.toLocaleDateString("es-PE");
+}
+
 async function cargarReportes() {
   const ventasSnap = await getDocs(collection(db, "ventas"));
 
@@ -28,19 +44,20 @@ async function cargarReportes() {
   ventasSnap.forEach((docu) => {
     const venta = docu.data();
 
-    total += venta.total || 0;
-    utilidad += venta.utilidad || 0;
+    const totalVenta = venta.total || 0;
+    const utilidadVenta = venta.utilidad ?? venta.ganancia ?? 0;
+
+    total += totalVenta;
+    utilidad += utilidadVenta;
     cantidad++;
 
-    const fecha = venta.fecha
-      ? new Date(venta.fecha).toLocaleDateString()
-      : "Sin fecha";
+    const fecha = formatearFecha(venta.fecha);
 
     if (!ventasPorDia[fecha]) {
       ventasPorDia[fecha] = 0;
     }
 
-    ventasPorDia[fecha] += venta.total || 0;
+    ventasPorDia[fecha] += totalVenta;
 
     const productos = venta.productos || [];
 
@@ -66,11 +83,11 @@ async function cargarReportes() {
       </div>
       <div>
         <small>Total</small>
-        <strong>S/${(venta.total || 0).toFixed(2)}</strong>
+        <strong>S/${totalVenta.toFixed(2)}</strong>
       </div>
       <div>
         <small>Utilidad</small>
-        <strong>S/${(venta.utilidad || 0).toFixed(2)}</strong>
+        <strong>S/${utilidadVenta.toFixed(2)}</strong>
       </div>
     `;
 
