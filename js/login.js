@@ -9,16 +9,53 @@ import {
   getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+const btnLogin = document.getElementById("btnLogin");
+const loginStatus = document.getElementById("loginStatus");
+const togglePassword = document.getElementById("togglePassword");
+
+function setStatus(texto, tipo = "") {
+  loginStatus.textContent = texto;
+  loginStatus.className = `login-status ${tipo}`;
+}
+
+function setLoading(loading) {
+  btnLogin.disabled = loading;
+  btnLogin.textContent = loading ? "Ingresando..." : "Ingresar al sistema";
+}
+
+togglePassword.addEventListener("click", () => {
+  const visible = passwordInput.type === "text";
+  passwordInput.type = visible ? "password" : "text";
+  togglePassword.textContent = visible ? "Ver" : "Ocultar";
+});
+
+passwordInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    window.login();
+  }
+});
+
+emailInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    passwordInput.focus();
+  }
+});
+
 window.login = async () => {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
+  const email = emailInput.value.trim();
+  const password = passwordInput.value.trim();
 
   if (!email || !password) {
-    alert("Completa correo y contraseña.");
+    setStatus("Completa correo y contraseña.", "error");
     return;
   }
 
   try {
+    setLoading(true);
+    setStatus("Validando acceso...");
+
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const uid = userCredential.user.uid;
 
@@ -26,7 +63,7 @@ window.login = async () => {
     const userSnap = await getDoc(userRef);
 
     if (!userSnap.exists()) {
-      alert("Usuario sin rol asignado. Contacta al administrador.");
+      setStatus("Usuario sin rol asignado. Contacta al administrador.", "error");
       return;
     }
 
@@ -37,10 +74,11 @@ window.login = async () => {
     } else if (userData.rol === "vendedor") {
       window.location.href = "pos/index.html";
     } else {
-      alert("Rol no válido.");
+      setStatus("Rol no valido.", "error");
     }
-
   } catch (error) {
-    alert("Error: " + error.message);
+    setStatus(error.message || "No se pudo iniciar sesion.", "error");
+  } finally {
+    setLoading(false);
   }
 };

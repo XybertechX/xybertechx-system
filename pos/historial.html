@@ -27,13 +27,27 @@
     <header class="pos-header">
       <div>
         <h1>Historial de Ventas</h1>
-        <p>Consulta ventas por fecha, método de pago y ticket.</p>
+        <p>Consulta tickets, metodos de pago y ventas devueltas.</p>
       </div>
       <span class="pos-badge">Vendedor</span>
     </header>
 
-    <section class="productos-panel">
+    <section class="pos-metrics">
+      <div>
+        <span>Total mostrado</span>
+        <strong id="historialTotal">S/0.00</strong>
+      </div>
+      <div>
+        <span>Tickets</span>
+        <strong id="historialTickets">0</strong>
+      </div>
+      <div>
+        <span>Devueltas</span>
+        <strong id="historialDevueltas">0</strong>
+      </div>
+    </section>
 
+    <section class="productos-panel">
       <div class="historial-filtros">
         <div>
           <label for="fechaInicio">Desde</label>
@@ -45,14 +59,25 @@
           <input type="date" id="fechaFin">
         </div>
 
+        <div>
+          <label for="metodoFiltro">Metodo</label>
+          <select id="metodoFiltro">
+            <option value="">Todos</option>
+            <option value="Efectivo">Efectivo</option>
+            <option value="Yape">Yape</option>
+            <option value="Plin">Plin</option>
+            <option value="Transferencia">Transferencia</option>
+            <option value="Tarjeta">Tarjeta</option>
+          </select>
+        </div>
+
         <button id="btnFiltrarFechas">Buscar</button>
-        <button id="btnLimpiarFiltro" type="button">Limpiar</button>
+        <button id="btnLimpiarFiltro" type="button">Ultimas ventas</button>
       </div>
 
       <div id="historialPOS" class="historial-pos">
         <p>Cargando ventas...</p>
       </div>
-
     </section>
   </main>
 
@@ -63,4 +88,4 @@
 <script type="module" src="../js/pos/historial.js"></script>
 
 </body>
-</html> 
+</html>

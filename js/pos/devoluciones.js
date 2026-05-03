@@ -5,12 +5,19 @@ import {
   doc,
   getDocs,
   increment,
+  limit,
+  orderBy,
+  query,
   runTransaction,
-  serverTimestamp
+  serverTimestamp,
+  where
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const listaDevoluciones = document.getElementById("listaDevoluciones");
 const buscarDevolucion = document.getElementById("buscarDevolucion");
+const devolucionesDisponibles = document.getElementById("devolucionesDisponibles");
+const devolucionesTotal = document.getElementById("devolucionesTotal");
+const devolucionesCoincidencias = document.getElementById("devolucionesCoincidencias");
 
 let ventas = [];
 
@@ -34,10 +41,16 @@ async function cargarVentas() {
   try {
     setMensaje("Cargando ventas...");
 
-    const querySnapshot = await getDocs(collection(db, "ventas"));
+    const consulta = query(
+      collection(db, "ventas"),
+      where("origen", "==", "POS"),
+      where("estado", "==", "completada"),
+      orderBy("fecha", "desc"),
+      limit(80)
+    );
+    const querySnapshot = await getDocs(consulta);
 
     ventas = [];
-
     querySnapshot.forEach((documento) => {
       ventas.push({
         id: documento.id,
@@ -45,16 +58,10 @@ async function cargarVentas() {
       });
     });
 
-    ventas.sort((a, b) => {
-      const fechaA = fechaComoDate(a.fecha) || new Date(0);
-      const fechaB = fechaComoDate(b.fecha) || new Date(0);
-      return fechaB - fechaA;
-    });
-
-    mostrarVentas(ventas);
+    mostrarVentas();
   } catch (error) {
     console.error("Error cargando devoluciones:", error);
-    setMensaje("Error al cargar ventas.");
+    setMensaje("Error al cargar ventas. Si Firebase pide un indice, crealo con origen/estado/fecha.");
   }
 }
 
@@ -76,17 +83,38 @@ function crearProductoDevuelto(producto) {
   return row;
 }
 
-function mostrarVentas(lista) {
+function ventasFiltradas() {
+  const texto = buscarDevolucion.value.trim().toLowerCase();
+  if (!texto) return ventas;
+
+  return ventas.filter((venta) => {
+    const idVenta = venta.id.toLowerCase();
+    const productosTexto = (venta.productos || [])
+      .map((producto) => String(producto.nombre || "").toLowerCase())
+      .join(" ");
+
+    return idVenta.includes(texto) || productosTexto.includes(texto);
+  });
+}
+
+function renderResumen(lista) {
+  devolucionesDisponibles.textContent = ventas.length;
+  devolucionesCoincidencias.textContent = lista.length;
+  devolucionesTotal.textContent = `S/${lista.reduce((sum, venta) => sum + Number(venta.total || 0), 0).toFixed(2)}`;
+}
+
+function mostrarVentas() {
   listaDevoluciones.innerHTML = "";
+  const visibles = ventasFiltradas();
+  renderResumen(visibles);
 
-  const ventasValidas = lista.filter((venta) => venta.estado !== "devuelta");
-
-  if (ventasValidas.length === 0) {
+  if (visibles.length === 0) {
     setMensaje("No hay ventas disponibles para devolucion.");
+    renderResumen([]);
     return;
   }
 
-  ventasValidas.forEach((venta) => {
+  visibles.forEach((venta) => {
     const fechaDate = fechaComoDate(venta.fecha);
     const fecha = fechaDate
       ? fechaDate.toLocaleString("es-PE", {
@@ -108,7 +136,7 @@ function mostrarVentas(lista) {
     const titulo = document.createElement("h3");
     titulo.textContent = `Venta #${venta.id.slice(0, 6)}`;
     const fechaNode = document.createElement("span");
-    fechaNode.textContent = fecha;
+    fechaNode.textContent = `${fecha} | ${venta.metodoPago || "Sin metodo"}`;
     tituloBox.append(titulo, fechaNode);
 
     const totalBox = document.createElement("div");
@@ -130,7 +158,7 @@ function mostrarVentas(lista) {
     footer.className = "devolucion-footer";
     const estado = document.createElement("span");
     estado.className = "estado-venta";
-    estado.textContent = "Lista para devolucion";
+    estado.textContent = "Restaurara stock al inventario";
     const boton = document.createElement("button");
     boton.className = "btn-devolver";
     boton.textContent = "Devolver venta";
@@ -178,27 +206,13 @@ async function devolverVenta(venta) {
     });
 
     alert("Devolucion registrada correctamente.");
-    cargarVentas();
+    await cargarVentas();
   } catch (error) {
     console.error("Error procesando devolucion:", error);
     alert(error.message || "Error al procesar la devolucion.");
   }
 }
 
-buscarDevolucion.addEventListener("input", () => {
-  const texto = buscarDevolucion.value.trim().toLowerCase();
-
-  const filtradas = ventas.filter((venta) => {
-    const idVenta = venta.id.toLowerCase();
-
-    const productosTexto = (venta.productos || [])
-      .map((producto) => String(producto.nombre || "").toLowerCase())
-      .join(" ");
-
-    return idVenta.includes(texto) || productosTexto.includes(texto);
-  });
-
-  mostrarVentas(filtradas);
-});
+buscarDevolucion.addEventListener("input", mostrarVentas);
 
 cargarVentas();

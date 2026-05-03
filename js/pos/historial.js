@@ -3,6 +3,7 @@ import { db } from "../firebase.js";
 import {
   collection,
   getDocs,
+  limit,
   orderBy,
   query,
   where
@@ -11,8 +12,12 @@ import {
 const historialPOS = document.getElementById("historialPOS");
 const fechaInicio = document.getElementById("fechaInicio");
 const fechaFin = document.getElementById("fechaFin");
+const metodoFiltro = document.getElementById("metodoFiltro");
 const btnFiltrar = document.getElementById("btnFiltrarFechas");
 const btnLimpiar = document.getElementById("btnLimpiarFiltro");
+const historialTotal = document.getElementById("historialTotal");
+const historialTickets = document.getElementById("historialTickets");
+const historialDevueltas = document.getElementById("historialDevueltas");
 
 let ventasGlobal = [];
 
@@ -29,20 +34,42 @@ function formatearFecha(fecha) {
   return fechaConvertida ? fechaConvertida.toLocaleString("es-PE") : "Sin fecha";
 }
 
-async function cargarHistorial() {
+function setMensaje(texto) {
+  historialPOS.innerHTML = "";
+  const p = document.createElement("p");
+  p.className = "carrito-vacio";
+  p.textContent = texto;
+  historialPOS.appendChild(p);
+}
+
+function rangoFechas() {
+  const inicio = fechaInicio.value ? new Date(fechaInicio.value) : null;
+  const fin = fechaFin.value ? new Date(fechaFin.value) : null;
+
+  if (fin) fin.setHours(23, 59, 59, 999);
+  return { inicio, fin };
+}
+
+async function cargarHistorial({ usarFechas = false } = {}) {
   try {
+    setMensaje("Cargando ventas...");
     const ventasRef = collection(db, "ventas");
+    const filtros = [where("origen", "==", "POS")];
+    const { inicio, fin } = rangoFechas();
+
+    if (usarFechas && inicio) filtros.push(where("fecha", ">=", inicio));
+    if (usarFechas && fin) filtros.push(where("fecha", "<=", fin));
 
     const consulta = query(
       ventasRef,
-      where("origen", "==", "POS"),
-      orderBy("fecha", "desc")
+      ...filtros,
+      orderBy("fecha", "desc"),
+      limit(usarFechas ? 150 : 50)
     );
 
     const ventasSnap = await getDocs(consulta);
 
     ventasGlobal = [];
-
     ventasSnap.forEach((docu) => {
       ventasGlobal.push({
         id: docu.id,
@@ -50,23 +77,37 @@ async function cargarHistorial() {
       });
     });
 
-    renderVentas(ventasGlobal);
+    renderVentas();
   } catch (error) {
     console.error("Error cargando historial POS:", error);
-    historialPOS.innerHTML = "";
-    const p = document.createElement("p");
-    p.textContent = "Error al cargar historial.";
-    historialPOS.appendChild(p);
+    setMensaje("Error al cargar historial. Revisa indices de Firebase si acabas de agregar filtros.");
   }
 }
 
-function renderVentas(lista) {
+function ventasVisibles() {
+  const metodo = metodoFiltro.value;
+  if (!metodo) return ventasGlobal;
+  return ventasGlobal.filter((venta) => venta.metodoPago === metodo);
+}
+
+function renderResumen(lista) {
+  const completadas = lista.filter((venta) => venta.estado !== "devuelta");
+  const devueltas = lista.length - completadas.length;
+  const total = completadas.reduce((sum, venta) => sum + Number(venta.total || 0), 0);
+
+  historialTotal.textContent = `S/${total.toFixed(2)}`;
+  historialTickets.textContent = completadas.length;
+  historialDevueltas.textContent = devueltas;
+}
+
+function renderVentas() {
+  const lista = ventasVisibles();
   historialPOS.innerHTML = "";
+  renderResumen(lista);
 
   if (lista.length === 0) {
-    const p = document.createElement("p");
-    p.textContent = "No hay ventas en ese rango.";
-    historialPOS.appendChild(p);
+    setMensaje("No hay ventas en ese filtro.");
+    renderResumen([]);
     return;
   }
 
@@ -111,34 +152,15 @@ function renderVentas(lista) {
   });
 }
 
-function filtrarPorFecha() {
-  const inicio = fechaInicio.value ? new Date(fechaInicio.value) : null;
-  const fin = fechaFin.value ? new Date(fechaFin.value) : null;
-
-  if (fin) {
-    fin.setHours(23, 59, 59, 999);
-  }
-
-  const filtradas = ventasGlobal.filter((venta) => {
-    const fechaVenta = fechaComoDate(venta.fecha);
-    if (!fechaVenta) return false;
-
-    if (inicio && fechaVenta < inicio) return false;
-    if (fin && fechaVenta > fin) return false;
-
-    return true;
-  });
-
-  renderVentas(filtradas);
-}
-
 function limpiarFiltro() {
   fechaInicio.value = "";
   fechaFin.value = "";
-  renderVentas(ventasGlobal);
+  metodoFiltro.value = "";
+  cargarHistorial();
 }
 
-btnFiltrar.addEventListener("click", filtrarPorFecha);
+btnFiltrar.addEventListener("click", () => cargarHistorial({ usarFechas: true }));
 btnLimpiar.addEventListener("click", limpiarFiltro);
+metodoFiltro.addEventListener("change", renderVentas);
 
 cargarHistorial();

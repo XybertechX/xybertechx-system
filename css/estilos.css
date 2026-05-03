@@ -771,6 +771,69 @@ ul li {
   font-size: 13px;
 }
 
+.login-modern .login-brand {
+  gap: 6px;
+}
+
+.login-highlights {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+  max-width: 620px;
+}
+
+.login-highlights div {
+  background: rgba(15, 23, 42, 0.68);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.login-highlights strong,
+.login-highlights span {
+  display: block;
+}
+
+.login-highlights span {
+  color: var(--muted);
+  margin-top: 4px;
+  font-size: 13px;
+}
+
+.login-box label {
+  display: block;
+  margin: 14px 0 8px;
+  color: #cbd5e1;
+  font-weight: 700;
+}
+
+.password-field {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+
+.password-field input {
+  margin-bottom: 0;
+}
+
+.password-field button {
+  margin: 0;
+  width: auto;
+  padding-inline: 14px;
+}
+
+.login-status {
+  min-height: 20px;
+  margin: 14px 0 0 !important;
+  color: #bfdbfe !important;
+}
+
+.login-status.error {
+  color: #fecaca !important;
+}
+
 @media (max-width: 900px) {
   .login-premium {
     grid-template-columns: 1fr;

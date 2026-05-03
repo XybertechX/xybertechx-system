@@ -95,6 +95,48 @@ body {
   font-size: 18px;
 }
 
+.pos-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pos-header-actions a {
+  color: #fff;
+  text-decoration: none;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: rgba(49, 92, 255, 0.28);
+  border: 1px solid rgba(255,255,255,0.1);
+  font-weight: 800;
+}
+
+.pos-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.pos-metrics div {
+  background: rgba(8, 13, 31, 0.92);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 18px;
+}
+
+.pos-metrics span {
+  display: block;
+  color: #aab7d8;
+  font-size: 13px;
+}
+
+.pos-metrics strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 28px;
+}
+
 /* Paneles */
 .pos-content {
   display: grid;
@@ -118,6 +160,21 @@ body {
   margin-bottom: 26px;
 }
 
+.panel-title p {
+  margin: 6px 0 0;
+  color: #aab7d8;
+}
+
+.pos-tools {
+  align-items: flex-start;
+}
+
+.pos-search-tools {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) 160px;
+  gap: 10px;
+}
+
 .panel-title h2,
 .carrito-panel h2 {
   margin: 0;
@@ -132,6 +189,16 @@ body {
   background: #060a17;
   color: #fff;
   font-size: 15px;
+  outline: none;
+}
+
+#filtroStockPOS,
+#metodoFiltro {
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: #060a17;
+  color: #fff;
   outline: none;
 }
 
@@ -218,6 +285,29 @@ body {
 /* Carrito */
 .carrito-lista {
   min-height: 360px;
+}
+
+.cart-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+
+.cart-heading p {
+  margin: 6px 0 0;
+  color: #aab7d8;
+}
+
+.btn-mini-danger {
+  border: none;
+  border-radius: 12px;
+  padding: 10px 12px;
+  color: #fff;
+  background: rgba(239, 68, 68, 0.88);
+  cursor: pointer;
+  font-weight: 800;
 }
 
 .carrito-vacio {
@@ -634,17 +724,23 @@ body {
   gap: 12px;
   margin-bottom: 20px;
   align-items: flex-end;
+  flex-wrap: wrap;
 }
 
 .historial-filtros label {
   font-size: 12px;
   color: #aaa;
+  display: block;
+  margin-bottom: 6px;
 }
 
-.historial-filtros input {
-  padding: 6px;
-  border-radius: 6px;
-  border: none;
+.historial-filtros input,
+.historial-filtros select {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: #060a17;
+  color: #fff;
 }
 
 .historial-filtros button {
@@ -677,5 +773,339 @@ body {
   border-radius: 10px;
   color: white;
   text-decoration: none;
+}
+
+.devoluciones-lista {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.devoluciones-lista .devolucion-card {
+  margin: 0;
+}
+
+@media (max-width: 1050px) {
+  .pos-metrics,
+  .devoluciones-lista {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== NUEVA VENTA POS - PULIDO VISUAL ===== */
+
+body {
+  background: #050816;
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.pos-layout {
+  background:
+    radial-gradient(circle at 20% 0%, rgba(37, 99, 235, 0.24), transparent 32%),
+    linear-gradient(135deg, #050816, #111827 58%, #171226);
+}
+
+.pos-sidebar {
+  width: 250px;
+  background: rgba(2, 6, 23, 0.9);
+  border-right: 1px solid rgba(148, 163, 184, 0.16);
+  padding: 24px 18px;
+}
+
+.pos-logo {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.74);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  box-shadow: none;
+}
+
+.pos-sidebar h2 {
+  font-size: 24px;
+}
+
+.pos-sidebar p {
+  margin: 6px 0 28px;
+  font-size: 14px;
+}
+
+.pos-sidebar nav a,
+.pos-sidebar nav button {
+  border-radius: 12px;
+  padding: 13px 14px;
+  font-size: 15px;
+  border: 1px solid transparent;
+}
+
+.pos-sidebar nav a.active,
+.pos-sidebar nav a:hover,
+.pos-sidebar nav button:hover {
+  background: rgba(37, 99, 235, 0.18);
+  border-color: rgba(96, 165, 250, 0.28);
+}
+
+.pos-main {
+  padding: 30px;
+  background: transparent;
+}
+
+.pos-header {
+  margin-bottom: 20px;
+}
+
+.pos-header h1 {
+  font-size: 34px;
+  letter-spacing: 0;
+}
+
+.pos-header p {
+  color: #aab7d8;
+  font-size: 16px;
+  margin: 7px 0 0;
+}
+
+.pos-badge,
+.pos-header-actions a {
+  border-radius: 12px;
+  padding: 11px 14px;
+  font-size: 14px;
+  background: rgba(15, 23, 42, 0.82);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.pos-metrics {
+  grid-template-columns: 1.2fr 0.6fr 0.8fr;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.pos-metrics div {
+  border-radius: 16px;
+  padding: 16px 18px;
+  background: rgba(15, 23, 42, 0.78);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.pos-metrics strong {
+  font-size: 26px;
+}
+
+.pos-content {
+  grid-template-columns: minmax(0, 1fr) 420px;
+  gap: 18px;
+  align-items: start;
+}
+
+.productos-panel,
+.carrito-panel {
+  border-radius: 20px;
+  padding: 22px;
+  background: rgba(15, 23, 42, 0.82);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.24);
+}
+
+.carrito-panel {
+  position: sticky;
+  top: 24px;
+}
+
+.panel-title {
+  margin-bottom: 18px;
+}
+
+.panel-title h2,
+.carrito-panel h2 {
+  font-size: 24px;
+}
+
+.pos-search-tools {
+  grid-template-columns: minmax(260px, 1fr) 150px;
+}
+
+#buscarProducto,
+#filtroStockPOS,
+#metodoFiltro,
+.metodo-pago-box select {
+  border-radius: 12px;
+  background: rgba(2, 6, 23, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  padding: 13px 14px;
+  font-size: 14px;
+}
+
+#buscarProducto {
+  width: 100%;
+}
+
+.productos-grid {
+  gap: 10px;
+  max-height: calc(100vh - 300px);
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.productos-grid::-webkit-scrollbar,
+.carrito-lista::-webkit-scrollbar {
+  width: 8px;
+}
+
+.productos-grid::-webkit-scrollbar-thumb,
+.carrito-lista::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.24);
+  border-radius: 999px;
+}
+
+.producto-card {
+  grid-template-columns: minmax(180px, 1.5fr) 0.8fr 0.55fr 0.7fr auto;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(2, 6, 23, 0.58);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  transition: border-color 0.2s, background 0.2s, transform 0.2s;
+}
+
+.producto-card:hover {
+  transform: translateY(-1px);
+  background: rgba(15, 23, 42, 0.96);
+  border-color: rgba(96, 165, 250, 0.38);
+}
+
+.producto-card h3 {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.producto-card p {
+  color: #93a4c7;
+  font-size: 13px;
+}
+
+.producto-card p:nth-of-type(2) {
+  padding: 5px 10px;
+  background: rgba(34, 197, 94, 0.12);
+  color: #86efac;
+}
+
+.producto-card strong {
+  color: #f8fafc;
+  font-size: 19px;
+}
+
+.producto-card button {
+  min-width: 96px;
+  border-radius: 12px;
+  padding: 10px 13px;
+  background: #2563eb;
+}
+
+.producto-card button:hover {
+  background: #1d4ed8;
+}
+
+.cart-heading {
+  align-items: center;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.cart-heading h2 {
+  margin: 0;
+}
+
+.btn-mini-danger {
+  background: rgba(239, 68, 68, 0.14);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  color: #fecaca;
+}
+
+.carrito-lista {
+  min-height: 260px;
+  max-height: calc(100vh - 520px);
+  overflow: auto;
+}
+
+.carrito-vacio {
+  margin-top: 48px;
+}
+
+.carrito-item {
+  padding: 14px 0;
+  align-items: center;
+}
+
+.carrito-item strong {
+  font-size: 15px;
+}
+
+.carrito-item p {
+  font-size: 13px;
+}
+
+.carrito-actions button {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 9px;
+  background: rgba(37, 99, 235, 0.72);
+}
+
+.carrito-actions span {
+  min-width: 22px;
+  text-align: center;
+  font-weight: 800;
+}
+
+.carrito-actions .btn-eliminar {
+  background: rgba(239, 68, 68, 0.86);
+}
+
+.carrito-total {
+  margin-top: 16px;
+  padding: 18px 0 0;
+  font-size: 20px;
+}
+
+.carrito-total strong {
+  font-size: 30px;
+}
+
+.metodo-pago-box {
+  margin-top: 18px;
+}
+
+.metodo-pago-box label {
+  display: block;
+  margin-bottom: 8px;
+  color: #aab7d8;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.btn-cobrar {
+  border-radius: 14px;
+  background: #059669;
+  box-shadow: 0 16px 34px rgba(5, 150, 105, 0.24);
+}
+
+.btn-cobrar:hover {
+  background: #047857;
+}
+
+@media (max-width: 1180px) {
+  .pos-content {
+    grid-template-columns: 1fr;
+  }
+
+  .carrito-panel {
+    position: static;
+  }
+
+  .productos-grid,
+  .carrito-lista {
+    max-height: none;
+  }
 }
 

@@ -11,7 +11,7 @@
 <div class="pos-layout">
 
   <aside class="pos-sidebar">
-    <img src="../img/asesor de ventas.png" alt="XyberTechX" class="pos-logo">
+    <img src="../img/logo 2.0.png" alt="XyberTechX" class="pos-logo">
     <h2>XyberTechX</h2>
     <p>POS de ventas</p>
 
@@ -28,26 +28,60 @@
     <header class="pos-header">
       <div>
         <h1>Punto de Venta</h1>
-        <p>Busca productos, arma el carrito y registra ventas.</p>
+        <p>Caja rapida para mostrador, productos de inventario y ticket inmediato.</p>
       </div>
-      <span class="pos-badge">Vendedor</span>
+      <div class="pos-header-actions">
+        <span class="pos-badge">Vendedor</span>
+        <a href="historial.html">Ver historial</a>
+      </div>
     </header>
+
+    <section class="pos-metrics">
+      <div>
+        <span>Total actual</span>
+        <strong id="totalVentaRapido">S/0.00</strong>
+      </div>
+      <div>
+        <span>Items</span>
+        <strong id="itemsCarrito">0</strong>
+      </div>
+      <div>
+        <span>Productos disponibles</span>
+        <strong id="productosDisponiblesPOS">0</strong>
+      </div>
+    </section>
 
     <section class="pos-content">
 
       <div class="productos-panel">
-        <div class="panel-title">
-          <h2>Productos</h2>
-          <input type="text" id="buscarProducto" placeholder="Buscar producto...">
+        <div class="panel-title pos-tools">
+          <div>
+            <h2>Productos</h2>
+            <p>Busca por nombre o categoria.</p>
+          </div>
+          <div class="pos-search-tools">
+            <input type="text" id="buscarProducto" placeholder="Buscar producto...">
+            <select id="filtroStockPOS">
+              <option value="disponibles">Disponibles</option>
+              <option value="todos">Todos</option>
+              <option value="bajo">Stock bajo</option>
+            </select>
+          </div>
         </div>
 
         <div id="listaProductos" class="productos-grid">
-          <!-- Productos desde Firebase -->
+          <p class="carrito-vacio">Cargando productos...</p>
         </div>
       </div>
 
       <div class="carrito-panel">
-        <h2>Carrito</h2>
+        <div class="cart-heading">
+          <div>
+            <h2>Carrito</h2>
+            <p>Venta en curso</p>
+          </div>
+          <button type="button" id="btnVaciarCarrito" class="btn-mini-danger">Vaciar</button>
+        </div>
 
         <div id="carritoLista" class="carrito-lista">
           <p class="carrito-vacio">No hay productos agregados.</p>
@@ -59,10 +93,9 @@
         </div>
 
         <div class="metodo-pago-box">
-          <label for="metodoPago">Método de pago</label>
-
+          <label for="metodoPago">Metodo de pago</label>
           <select id="metodoPago">
-            <option value="">Seleccionar método</option>
+            <option value="">Seleccionar metodo</option>
             <option value="Efectivo">Efectivo</option>
             <option value="Yape">Yape</option>
             <option value="Plin">Plin</option>

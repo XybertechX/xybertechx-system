@@ -11,7 +11,7 @@
 <div class="pos-layout">
 
   <aside class="pos-sidebar">
-    <img src="../img/asesor de ventas.png" alt="XyberTechX" class="pos-logo">
+    <img src="../img/logo 2.0.png" alt="XyberTechX" class="pos-logo">
     <h2>XyberTechX</h2>
     <p>POS de ventas</p>
 
@@ -28,21 +28,37 @@
     <header class="pos-header">
       <div>
         <h1>Devoluciones</h1>
-        <p>Busca una venta y registra la devolución.</p>
+        <p>Restaura stock y marca ventas POS como devueltas.</p>
       </div>
       <span class="pos-badge">Vendedor</span>
     </header>
 
-    <section class="pos-content">
-      <div class="productos-panel" style="width: 100%;">
-        <div class="panel-title">
-          <h2>Ventas realizadas</h2>
-          <input type="text" id="buscarDevolucion" placeholder="Buscar venta...">
-        </div>
+    <section class="pos-metrics">
+      <div>
+        <span>Ventas disponibles</span>
+        <strong id="devolucionesDisponibles">0</strong>
+      </div>
+      <div>
+        <span>Total mostrado</span>
+        <strong id="devolucionesTotal">S/0.00</strong>
+      </div>
+      <div>
+        <span>Busqueda</span>
+        <strong id="devolucionesCoincidencias">0</strong>
+      </div>
+    </section>
 
-        <div id="listaDevoluciones" class="productos-grid">
-          <p class="carrito-vacio">Cargando ventas...</p>
+    <section class="productos-panel">
+      <div class="panel-title pos-tools">
+        <div>
+          <h2>Ventas para devolucion</h2>
+          <p>Se muestran las ultimas ventas POS completadas.</p>
         </div>
+        <input type="text" id="buscarDevolucion" placeholder="Buscar por ticket o producto...">
+      </div>
+
+      <div id="listaDevoluciones" class="devoluciones-lista">
+        <p class="carrito-vacio">Cargando ventas...</p>
       </div>
     </section>
 
