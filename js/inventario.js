@@ -29,9 +29,13 @@ function estadoProducto(stock) {
 }
 
 function limpiarFormulario() {
-  ["nombre", "categoria", "costo", "precio", "stock"].forEach((id) => {
+  ["nombre", "categoria", "costo", "precio", "stock", "imagen"].forEach((id) => {
     document.getElementById(id).value = "";
   });
+}
+
+function obtenerImagen(producto) {
+  return (producto.imagen || producto.imagenUrl || producto.imageUrl || "").trim();
 }
 
 function crearDato(label, valor) {
@@ -79,9 +83,10 @@ window.agregarProducto = async () => {
   const costo = Number(document.getElementById("costo").value);
   const precio = Number(document.getElementById("precio").value);
   const stock = Number(document.getElementById("stock").value);
+  const imagen = document.getElementById("imagen").value.trim();
 
-  if (!nombre || !categoria || costo < 0 || precio <= 0 || stock < 0) {
-    alert("Completa producto, categoria, precio y stock con valores validos.");
+  if (!nombre || !categoria || !imagen || costo < 0 || precio <= 0 || stock < 0) {
+    alert("Completa producto, categoria, imagen, precio y stock con valores validos.");
     return;
   }
 
@@ -90,7 +95,9 @@ window.agregarProducto = async () => {
     categoria,
     costo,
     precio,
-    stock
+    stock,
+    imagen,
+    imagenUrl: imagen
   });
 
   limpiarFormulario();
@@ -98,22 +105,51 @@ window.agregarProducto = async () => {
 };
 
 async function editarProducto(producto) {
-  const nuevoPrecio = prompt("Nuevo precio venta:", producto.precio);
-  const nuevoStock = prompt("Nuevo stock:", producto.stock);
+  const nuevoNombre = prompt("Nombre del producto:", producto.nombre || "");
+  if (nuevoNombre === null) return;
 
-  if (nuevoPrecio === null || nuevoStock === null) return;
+  const nuevaCategoria = prompt("Categoria:", producto.categoria || "");
+  if (nuevaCategoria === null) return;
 
+  const nuevoCosto = prompt("Costo:", producto.costo ?? 0);
+  if (nuevoCosto === null) return;
+
+  const nuevoPrecio = prompt("Precio venta:", producto.precio ?? 0);
+  if (nuevoPrecio === null) return;
+
+  const nuevoStock = prompt("Stock:", producto.stock ?? 0);
+  if (nuevoStock === null) return;
+
+  const nuevaImagen = prompt("URL de imagen para web/POS:", obtenerImagen(producto));
+  if (nuevaImagen === null) return;
+
+  const nombreActualizado = nuevoNombre.trim();
+  const categoriaActualizada = nuevaCategoria.trim();
+  const costoActualizado = Number(nuevoCosto);
   const precioActualizado = Number(nuevoPrecio);
   const stockActualizado = Number(nuevoStock);
+  const imagenActualizada = nuevaImagen.trim();
 
-  if (precioActualizado <= 0 || stockActualizado < 0) {
-    alert("Precio y stock deben ser valores validos.");
+  if (
+    !nombreActualizado ||
+    !categoriaActualizada ||
+    !imagenActualizada ||
+    costoActualizado < 0 ||
+    precioActualizado <= 0 ||
+    stockActualizado < 0
+  ) {
+    alert("Nombre, categoria, imagen, precio y stock deben ser valores validos.");
     return;
   }
 
   await updateDoc(doc(db, "inventario", producto.id), {
+    nombre: nombreActualizado,
+    categoria: categoriaActualizada,
+    costo: costoActualizado,
     precio: precioActualizado,
-    stock: stockActualizado
+    stock: stockActualizado,
+    imagen: imagenActualizada,
+    imagenUrl: imagenActualizada
   });
 
   await cargarProductos();
@@ -142,9 +178,22 @@ function renderProductos() {
     const stock = Number(producto.stock || 0);
     const ganancia = Number(producto.precio || 0) - Number(producto.costo || 0);
     const estado = estadoProducto(stock);
+    const imagen = obtenerImagen(producto);
 
     const li = document.createElement("li");
     li.className = "inventory-row";
+
+    const productoVista = document.createElement("div");
+    productoVista.className = "inventory-product-wrap";
+
+    const thumb = document.createElement("img");
+    thumb.className = "inventory-thumb";
+    thumb.src = imagen || "img/logo 2.0.png";
+    thumb.alt = producto.nombre || "Producto";
+    thumb.loading = "lazy";
+    thumb.onerror = () => {
+      thumb.src = "img/logo 2.0.png";
+    };
 
     const info = document.createElement("div");
     info.className = "inventory-product";
@@ -153,6 +202,7 @@ function renderProductos() {
     const categoria = document.createElement("small");
     categoria.textContent = producto.categoria || "Sin categoria";
     info.append(nombre, categoria);
+    productoVista.append(thumb, info);
 
     const estadoBox = document.createElement("div");
     const badge = document.createElement("span");
@@ -174,7 +224,7 @@ function renderProductos() {
 
     acciones.append(btnEditar, btnEliminar);
     li.append(
-      info,
+      productoVista,
       crearDato("Costo", dinero(producto.costo)),
       crearDato("Venta", dinero(producto.precio)),
       crearDato("Margen", dinero(ganancia)),
