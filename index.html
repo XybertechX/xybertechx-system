@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard - XyberTechX</title>
+  <title>Centro de Control - XyberTechX</title>
   <link rel="stylesheet" href="css/estilos.css">
 </head>
 <body>
@@ -21,84 +21,142 @@
     <nav class="menu">
       <a class="active" href="index.html">Panel de control</a>
       <a href="inventario.html">Inventario</a>
-      <a href="ventas.html">Ventas</a>
+      <a href="ventas.html">Ventas CEO</a>
       <a href="reportes.html">Reportes</a>
       <a href="boletas.html">Boletas</a>
-      <button onclick="logout()">Cerrar sesión</button>
+      <button onclick="logout()">Cerrar sesion</button>
     </nav>
   </aside>
 
-  <main class="main">
+  <main class="main control-main">
 
-    <section class="topbar">
-  <div>
-    <h2>Centro de Operaciones XyberTechX</h2>
-    <p>Resumen operativo de XyberTechX Technology</p>
-  </div>
-  <div class="user-box">Administrador</div>
-</section>
-
-    <!-- 🔹 MÉTRICAS PRINCIPALES -->
-    <section class="grid">
-
-      <div class="card stat">
-        <div class="label">Ventas hoy</div>
-        <div class="value">S/ <span id="ventasHoy">0</span></div>
+    <section class="topbar control-topbar">
+      <div>
+        <h2>Centro de Control XyberTechX</h2>
+        <p>Operacion diaria del POS, inventario y caja.</p>
       </div>
-
-      <div class="card stat">
-        <div class="label">Ganancia hoy</div>
-        <div class="value">S/ <span id="gananciaHoy">0</span></div>
+      <div class="control-actions">
+        <a href="pos/index.html">Abrir POS</a>
+        <a href="inventario.html">Inventario</a>
       </div>
-
-      <div class="card stat">
-        <div class="label">Ticket promedio</div>
-        <div class="value">S/ <span id="ticketHoy">0</span></div>
-      </div>
-
-      <div class="card stat">
-        <div class="label">Stock bajo</div>
-        <div class="value"><span id="stockBajo">0</span></div>
-      </div>
-
     </section>
 
-    <!-- 🔹 ALERTA VISUAL -->
-    <section class="card full" id="alertaVentas">
-      <h3>Estado del día</h3>
-      <p id="mensajeVentas">Calculando...</p>
-    </section>
-
-    <!-- 🔹 COMPARACIÓN -->
-    <section class="card full">
-      <h3>Comparación vs ayer</h3>
-
-      <div class="grid" style="margin-top: 15px;">
-
-        <div class="card stat">
-          <div class="label">Ventas ayer</div>
-          <div class="value">S/ <span id="ventasAyer">0</span></div>
+    <section class="control-grid">
+      <div class="control-hero">
+        <div>
+          <span class="eyebrow">Caja POS de hoy</span>
+          <h1>S/ <span id="ventasHoy">0.00</span></h1>
+          <p id="mensajeVentas">Calculando estado del dia...</p>
         </div>
 
-        <div class="card stat">
-          <div class="label">Diferencia</div>
-          <div class="value">S/ <span id="diferenciaVentas">0</span></div>
+        <div class="hero-metrics">
+          <div>
+            <span>Ganancia POS</span>
+            <strong>S/ <span id="gananciaHoy">0.00</span></strong>
+          </div>
+          <div>
+            <span>Tickets POS</span>
+            <strong id="ticketsHoy">0</strong>
+          </div>
+          <div>
+            <span>Ticket promedio</span>
+            <strong>S/ <span id="ticketHoy">0.00</span></strong>
+          </div>
+        </div>
+      </div>
+
+      <aside class="control-side">
+        <div class="mini-card">
+          <span>Stock bajo</span>
+          <strong id="stockBajo">0</strong>
+          <small>Productos por reponer</small>
         </div>
 
-        <div class="card stat">
-          <div class="label">Variación</div>
-          <div class="value"><span id="variacionVentas">0%</span></div>
+        <div class="mini-card">
+          <span>Agotados</span>
+          <strong id="stockAgotado">0</strong>
+          <small>No disponibles para POS/web</small>
         </div>
 
+        <div class="mini-card">
+          <span>Servicios CEO hoy</span>
+          <strong>S/ <span id="ventasCeoHoy">0.00</span></strong>
+          <small>Canal separado del POS</small>
+        </div>
+      </aside>
+    </section>
+
+    <section class="control-panels">
+      <div class="card control-panel">
+        <div class="panel-heading">
+          <div>
+            <h3>Metodos de pago POS</h3>
+            <p>Caja diaria por canal de cobro.</p>
+          </div>
+          <span id="ventasNetasLabel">Completadas</span>
+        </div>
+        <div class="payment-grid" id="metodosPagoResumen"></div>
+      </div>
+
+      <div class="card control-panel">
+        <div class="panel-heading">
+          <div>
+            <h3>Inventario critico</h3>
+            <p>Stock que afecta al POS y a la pagina web.</p>
+          </div>
+          <a href="inventario.html">Gestionar</a>
+        </div>
+        <ul class="compact-list" id="inventarioCritico"></ul>
       </div>
     </section>
 
-    <!-- 🔹 ÚLTIMAS VENTAS -->
-    <section class="card full">
-      <h3>Últimas ventas</h3>
-      <ul id="ultimasVentas"></ul>
+    <section class="control-panels">
+      <div class="card control-panel">
+        <div class="panel-heading">
+          <div>
+            <h3>Ultimas ventas POS</h3>
+            <p>Movimiento reciente de caja.</p>
+          </div>
+          <a href="pos/historial.html">Historial</a>
+        </div>
+        <ul class="compact-list" id="ultimasVentas"></ul>
+      </div>
+
+      <div class="card control-panel">
+        <div class="panel-heading">
+          <div>
+            <h3>Productos top</h3>
+            <p>Mas vendidos por POS hoy.</p>
+          </div>
+          <span id="variacionVentas">0%</span>
+        </div>
+        <ul class="compact-list" id="productosTop"></ul>
+      </div>
     </section>
-    
+
+    <section class="card control-panel">
+      <div class="panel-heading">
+        <div>
+          <h3>Comparacion operativa</h3>
+          <p>El POS manda el centro de control. Ventas CEO y boletas quedan como canales auxiliares.</p>
+        </div>
+      </div>
+
+      <div class="comparison-grid">
+        <div>
+          <span>POS ayer</span>
+          <strong>S/ <span id="ventasAyer">0.00</span></strong>
+        </div>
+        <div>
+          <span>Diferencia POS</span>
+          <strong>S/ <span id="diferenciaVentas">0.00</span></strong>
+        </div>
+        <div>
+          <span>Devoluciones hoy</span>
+          <strong>S/ <span id="devolucionesHoy">0.00</span></strong>
+        </div>
+      </div>
+    </section>
 
   </main>
 

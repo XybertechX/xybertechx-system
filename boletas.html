@@ -21,78 +21,112 @@
     <nav class="menu">
       <a href="index.html">Panel de control</a>
       <a href="inventario.html">Inventario</a>
-      <a href="ventas.html">Ventas</a>
+      <a href="ventas.html">Ventas CEO</a>
       <a href="reportes.html">Reportes</a>
       <a class="active" href="boletas.html">Boletas</a>
-      <button onclick="logout()">Cerrar sesión</button>
+      <button onclick="logout()">Cerrar sesion</button>
     </nav>
   </aside>
 
-  <main class="main">
+  <main class="main quote-page">
 
-    <section class="topbar">
+    <section class="topbar control-topbar">
       <div>
         <h2>Boletas y Cotizaciones</h2>
-        <p>Genera presupuestos técnicos personalizados para clientes.</p>
+        <p>Para servicios tecnicos, productos externos y propuestas fuera del inventario POS.</p>
       </div>
-      <div class="user-box">Administrador</div>
-    </section>
-
-    <!-- DATOS DEL CLIENTE -->
-    <section class="card full">
-      <h3>Datos del cliente</h3>
-
-      <div class="boleta-grid">
-        <input id="cliente" placeholder="Nombre del cliente">
-        <input id="telefono" placeholder="Teléfono">
-        <input id="fecha" type="date">
-        <select id="tipoCotizacion">
-          <option value="Servicio técnico">Servicio técnico</option>
-          <option value="Armado de PC">Armado de PC</option>
-          <option value="Mantenimiento empresarial">Mantenimiento empresarial</option>
-          <option value="Cotización general">Cotización general</option>
-        </select>
+      <div class="control-actions">
+        <a href="index.html">Centro de control</a>
+        <a href="ventas.html">Ventas CEO</a>
       </div>
     </section>
 
-    <!-- AGREGAR ITEM -->
-    <section class="card full">
-      <h3>Agregar detalle</h3>
+    <section class="control-grid quote-grid">
+      <div class="card control-panel">
+        <div class="panel-heading">
+          <div>
+            <h3>Datos del cliente</h3>
+            <p>Informacion que aparecera en el PDF.</p>
+          </div>
+        </div>
 
-      <div class="boleta-grid item-form">
-        <input id="descripcion" placeholder="Descripción del servicio, producto o material">
-        <input id="cantidad" type="number" placeholder="Cantidad">
-        <input id="precio" type="number" placeholder="Precio unitario">
-        <button onclick="agregarItem()">Agregar</button>
+        <div class="quote-form">
+          <input id="cliente" placeholder="Nombre del cliente">
+          <input id="telefono" placeholder="Telefono">
+          <input id="fecha" type="date">
+          <select id="tipoCotizacion">
+            <option value="Servicio tecnico">Servicio tecnico</option>
+            <option value="Armado de PC">Armado de PC</option>
+            <option value="Mantenimiento empresarial">Mantenimiento empresarial</option>
+            <option value="Producto externo">Producto externo</option>
+            <option value="Cotizacion general">Cotizacion general</option>
+          </select>
+          <input id="validez" type="number" min="1" placeholder="Validez en dias">
+          <input id="asesor" placeholder="Asesor / responsable">
+        </div>
+      </div>
+
+      <aside class="control-side">
+        <div class="mini-card">
+          <span>Subtotal</span>
+          <strong>S/ <span id="subtotal">0.00</span></strong>
+          <small>Antes de descuento</small>
+        </div>
+        <div class="mini-card">
+          <span>Descuento</span>
+          <input id="descuento" type="number" min="0" placeholder="0" oninput="calcularTotales()">
+        </div>
+        <div class="mini-card">
+          <span>Total final</span>
+          <strong>S/ <span id="totalFinal">0.00</span></strong>
+          <small>Importe para el cliente</small>
+        </div>
+      </aside>
+    </section>
+
+    <section class="control-panels">
+      <div class="card control-panel">
+        <div class="panel-heading">
+          <div>
+            <h3>Agregar detalle</h3>
+            <p>Servicios, repuestos o productos externos al inventario.</p>
+          </div>
+        </div>
+
+        <div class="quote-item-form">
+          <input id="descripcion" placeholder="Descripcion del servicio, producto o material">
+          <input id="cantidad" type="number" min="1" placeholder="Cantidad">
+          <input id="precio" type="number" min="0" step="0.01" placeholder="Precio unitario">
+          <button onclick="agregarItem()">Agregar</button>
+        </div>
+
+        <div class="template-row">
+          <button type="button" onclick="usarPlantilla('diagnostico')">Diagnostico</button>
+          <button type="button" onclick="usarPlantilla('mantenimiento')">Mantenimiento</button>
+          <button type="button" onclick="usarPlantilla('formateo')">Formateo</button>
+        </div>
+      </div>
+
+      <div class="card control-panel">
+        <div class="panel-heading">
+          <div>
+            <h3>Notas para el cliente</h3>
+            <p>Condiciones, tiempos o alcances del servicio.</p>
+          </div>
+        </div>
+        <textarea id="notas" rows="8" placeholder="Ejemplo: Atencion previa coordinacion. La garantia aplica sobre el trabajo realizado."></textarea>
       </div>
     </section>
 
-    <!-- DETALLE -->
-    <section class="card full">
-      <h3>Detalle de cotización</h3>
-      <ul id="listaItems"></ul>
-    </section>
-
-    <!-- RESUMEN -->
-    <section class="card full">
-      <h3>Resumen</h3>
-
-      <div class="summary-row">
-        <span>Subtotal</span>
-        <strong>S/ <span id="subtotal">0.00</span></strong>
+    <section class="card control-panel">
+      <div class="panel-heading">
+        <div>
+          <h3>Detalle de cotizacion</h3>
+          <p>Revisa el contenido antes de generar el PDF.</p>
+        </div>
+        <button onclick="generarPDF()">Generar PDF</button>
       </div>
-
-      <div class="summary-row">
-        <span>Descuento</span>
-        <input id="descuento" type="number" placeholder="0" oninput="calcularTotales()">
-      </div>
-
-      <div class="summary-row profit">
-        <span>Total final</span>
-        <strong>S/ <span id="totalFinal">0.00</span></strong>
-      </div>
-
-      <button onclick="generarPDF()">Generar PDF</button>
+      <ul id="listaItems" class="compact-list"></ul>
     </section>
 
   </main>

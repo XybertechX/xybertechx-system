@@ -19,68 +19,117 @@
     </div>
 
     <nav class="menu">
-      <a href="index.html">Dashboard</a>
+      <a href="index.html">Panel de control</a>
       <a href="inventario.html">Inventario</a>
-      <a href="ventas.html">Ventas</a>
+      <a href="ventas.html">Ventas CEO</a>
       <a class="active" href="reportes.html">Reportes</a>
       <a href="boletas.html">Boletas</a>
-      <button onclick="logout()">Cerrar sesión</button>
+      <button onclick="logout()">Cerrar sesion</button>
     </nav>
   </aside>
 
-  <main class="main">
-    <section class="topbar">
+  <main class="main reports-page">
+    <section class="topbar control-topbar">
       <div>
-        <h2>Reportes</h2>
-        <p>Analiza ventas, rendimiento y productos más vendidos.</p>
+        <h2>Reportes Operativos</h2>
+        <p>Lectura separada de POS, servicios CEO, devoluciones y productos vendidos.</p>
       </div>
-      <div class="user-box">Administrador</div>
-    </section>
-
-    <!-- 🔹 BLOQUE 1 -->
-    <section class="grid">
-      <div class="card stat">
-        <div class="label">Ventas totales</div>
-        <div class="value">S/ <span id="totalVentas">0</span></div>
-      </div>
-
-      <div class="card stat">
-        <div class="label">Cantidad de ventas</div>
-        <div class="value"><span id="cantidadVentas">0</span></div>
-      </div>
-
-      <div class="card stat">
-        <div class="label">Ticket promedio</div>
-        <div class="value">S/ <span id="ticketPromedio">0</span></div>
+      <div class="control-actions">
+        <a href="index.html">Centro de control</a>
+        <a href="pos/historial.html">Historial POS</a>
       </div>
     </section>
 
-    <!-- 🔹 BLOQUE 2 -->
-    <section class="grid">
-      <div class="card stat">
-        <div class="label">Inversión</div>
-        <div class="value">S/ <span id="totalInversion">0</span></div>
+    <section class="inventory-summary">
+      <div class="mini-card">
+        <span>Ventas POS</span>
+        <strong>S/ <span id="totalVentas">0.00</span></strong>
+        <small id="cantidadVentas">0 tickets</small>
+      </div>
+      <div class="mini-card">
+        <span>Ganancia POS</span>
+        <strong>S/ <span id="totalUtilidad">0.00</span></strong>
+        <small>Utilidad estimada</small>
+      </div>
+      <div class="mini-card">
+        <span>Servicios CEO</span>
+        <strong>S/ <span id="totalCeo">0.00</span></strong>
+        <small>Ventas a domicilio/manuales</small>
+      </div>
+      <div class="mini-card">
+        <span>Devoluciones</span>
+        <strong>S/ <span id="totalDevoluciones">0.00</span></strong>
+        <small>Ventas POS devueltas</small>
+      </div>
+    </section>
+
+    <section class="control-panels">
+      <div class="card control-panel">
+        <div class="panel-heading">
+          <div>
+            <h3>Ventas por dia</h3>
+            <p>Tendencia de caja POS completada.</p>
+          </div>
+          <span>Ticket prom. S/ <span id="ticketPromedio">0.00</span></span>
+        </div>
+        <canvas id="graficoVentas"></canvas>
       </div>
 
-      <div class="card stat">
-        <div class="label">Ganancia</div>
-        <div class="value">S/ <span id="totalUtilidad">0</span></div>
+      <div class="card control-panel">
+        <div class="panel-heading">
+          <div>
+            <h3>Metodos de pago</h3>
+            <p>Distribucion de cobros POS.</p>
+          </div>
+        </div>
+        <div class="payment-grid" id="reporteMetodosPago"></div>
       </div>
     </section>
 
-    <section class="card full">
-      <h3>Producto más vendido</h3>
-      <p><span class="badge" id="productoTop">-</span></p>
+    <section class="control-panels">
+      <div class="card control-panel">
+        <div class="panel-heading">
+          <div>
+            <h3>Productos mas vendidos</h3>
+            <p>Ranking historico POS.</p>
+          </div>
+          <span id="productoTop">-</span>
+        </div>
+        <ul class="compact-list" id="productosTopReporte"></ul>
+      </div>
+
+      <div class="card control-panel">
+        <div class="panel-heading">
+          <div>
+            <h3>Resumen financiero</h3>
+            <p>Costo invertido y margen estimado.</p>
+          </div>
+        </div>
+        <div class="comparison-grid">
+          <div>
+            <span>Inversion</span>
+            <strong>S/ <span id="totalInversion">0.00</span></strong>
+          </div>
+          <div>
+            <span>Margen</span>
+            <strong><span id="margenPromedio">0%</span></strong>
+          </div>
+          <div>
+            <span>Canal principal</span>
+            <strong id="canalPrincipal">POS</strong>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <section class="card full">
-      <h3>Historial de ventas</h3>
-      <ul id="historialVentas"></ul>
-    </section>
-
-    <section class="card full">
-      <h3>Ventas por día</h3>
-      <canvas id="graficoVentas"></canvas>
+    <section class="card control-panel">
+      <div class="panel-heading">
+        <div>
+          <h3>Historial operativo</h3>
+          <p>Ultimos movimientos de ventas completadas y servicios CEO.</p>
+        </div>
+      </div>
+      <ul id="historialVentas" class="compact-list"></ul>
     </section>
   </main>
 

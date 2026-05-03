@@ -9,9 +9,16 @@ const cantidadVentas = document.getElementById("cantidadVentas");
 const ticketPromedio = document.getElementById("ticketPromedio");
 const productoTop = document.getElementById("productoTop");
 const historialVentas = document.getElementById("historialVentas");
-
 const totalUtilidad = document.getElementById("totalUtilidad");
 const totalInversion = document.getElementById("totalInversion");
+const totalCeo = document.getElementById("totalCeo");
+const totalDevoluciones = document.getElementById("totalDevoluciones");
+const margenPromedio = document.getElementById("margenPromedio");
+const canalPrincipal = document.getElementById("canalPrincipal");
+const reporteMetodosPago = document.getElementById("reporteMetodosPago");
+const productosTopReporte = document.getElementById("productosTopReporte");
+
+const metodosBase = ["Efectivo", "Yape", "Plin", "Transferencia", "Tarjeta"];
 
 function fechaComoDate(fecha) {
   if (!fecha) return null;
@@ -26,113 +33,170 @@ function formatearFecha(fecha) {
   return fechaConvertida ? fechaConvertida.toLocaleDateString("es-PE") : "Sin fecha";
 }
 
-function agregarHistorial(venta, fecha, totalVenta, utilidadVenta) {
-  const productos = venta.productos || [];
-  const nombres = productos.length > 0
-    ? productos.map(p => `${p.nombre || "Producto"} x${p.cantidad || 0}`).join(", ")
-    : "Venta antigua sin detalle";
+function dinero(valor) {
+  return Number(valor || 0).toFixed(2);
+}
 
+function origenVenta(venta) {
+  return venta.origen || "Admin";
+}
+
+function agregarItem(lista, titulo, detalle, valor, badge) {
   const li = document.createElement("li");
 
-  const detalle = document.createElement("div");
-  const nombre = document.createElement("strong");
-  nombre.textContent = nombres;
-  const fechaNode = document.createElement("small");
-  fechaNode.textContent = fecha;
-  detalle.append(nombre, fechaNode);
+  const texto = document.createElement("div");
+  const strong = document.createElement("strong");
+  strong.textContent = titulo;
+  const small = document.createElement("small");
+  small.textContent = detalle;
+  texto.append(strong, small);
 
-  const totalBox = document.createElement("div");
-  const totalLabel = document.createElement("small");
-  totalLabel.textContent = "Total";
-  const totalValor = document.createElement("strong");
-  totalValor.textContent = `S/${totalVenta.toFixed(2)}`;
-  totalBox.append(totalLabel, totalValor);
+  const derecha = document.createElement("div");
+  derecha.className = "list-value";
+  const valorNode = document.createElement("span");
+  valorNode.textContent = valor;
+  derecha.appendChild(valorNode);
 
-  const utilidadBox = document.createElement("div");
-  const utilidadLabel = document.createElement("small");
-  utilidadLabel.textContent = "Utilidad";
-  const utilidadValor = document.createElement("strong");
-  utilidadValor.textContent = `S/${utilidadVenta.toFixed(2)}`;
-  utilidadBox.append(utilidadLabel, utilidadValor);
+  if (badge) {
+    const badgeNode = document.createElement("small");
+    badgeNode.className = "status-pill";
+    badgeNode.textContent = badge;
+    derecha.appendChild(badgeNode);
+  }
 
-  li.append(detalle, totalBox, utilidadBox);
-  historialVentas.appendChild(li);
+  li.append(texto, derecha);
+  lista.appendChild(li);
+}
+
+function renderMetodo(nombre, total, cantidad) {
+  const card = document.createElement("div");
+  card.className = "payment-card";
+
+  const label = document.createElement("span");
+  label.textContent = nombre;
+  const value = document.createElement("strong");
+  value.textContent = `S/${dinero(total)}`;
+  const count = document.createElement("small");
+  count.textContent = `${cantidad} operaciones`;
+
+  card.append(label, value, count);
+  reporteMetodosPago.appendChild(card);
 }
 
 async function cargarReportes() {
   const ventasSnap = await getDocs(collection(db, "ventas"));
 
-  let total = 0;
-  let utilidad = 0;
+  let totalPos = 0;
+  let utilidadPos = 0;
   let inversion = 0;
-  let cantidad = 0;
+  let cantidadPos = 0;
+  let totalServiciosCeo = 0;
+  let devoluciones = 0;
   let productosVendidos = {};
   let ventasPorDia = {};
+  let metodos = {};
+  let historial = [];
 
-  historialVentas.innerHTML = "";
-
-  ventasSnap.forEach((docu) => {
-    const venta = docu.data();
-    if (venta.estado === "devuelta") return;
-
-    const totalVenta = Number(venta.total || 0);
-    const utilidadVenta = Number(venta.utilidad ?? venta.ganancia ?? 0);
-
-    total += totalVenta;
-    utilidad += utilidadVenta;
-    cantidad++;
-
-    const fecha = formatearFecha(venta.fecha);
-
-    if (!ventasPorDia[fecha]) {
-      ventasPorDia[fecha] = 0;
-    }
-
-    ventasPorDia[fecha] += totalVenta;
-
-    const productos = venta.productos || [];
-
-    productos.forEach((p) => {
-      inversion += Number(p.costo || 0) * Number(p.cantidad || 0);
-
-      const nombreProducto = p.nombre || "Producto";
-      if (!productosVendidos[nombreProducto]) {
-        productosVendidos[nombreProducto] = 0;
-      }
-
-      productosVendidos[nombreProducto] += Number(p.cantidad || 0);
-    });
-
-    agregarHistorial(venta, fecha, totalVenta, utilidadVenta);
+  metodosBase.forEach((metodo) => {
+    metodos[metodo] = { total: 0, cantidad: 0 };
   });
 
-  totalVentas.textContent = total.toFixed(2);
-  cantidadVentas.textContent = cantidad;
-  ticketPromedio.textContent = cantidad > 0 ? (total / cantidad).toFixed(2) : "0.00";
+  ventasSnap.forEach((docu) => {
+    const venta = { id: docu.id, ...docu.data() };
+    const origen = origenVenta(venta);
+    const esPos = origen === "POS";
+    const devuelta = venta.estado === "devuelta";
+    const totalVenta = Number(venta.total || 0);
+    const utilidadVenta = Number(venta.utilidad ?? venta.ganancia ?? 0);
+    const fecha = formatearFecha(venta.fecha);
+    const fechaDate = fechaComoDate(venta.fecha) || new Date(0);
 
-  if (totalUtilidad) totalUtilidad.textContent = utilidad.toFixed(2);
-  if (totalInversion) totalInversion.textContent = inversion.toFixed(2);
-
-  let topProducto = "-";
-  let topCantidad = 0;
-
-  for (const producto in productosVendidos) {
-    if (productosVendidos[producto] > topCantidad) {
-      topProducto = producto;
-      topCantidad = productosVendidos[producto];
+    if (esPos && devuelta) {
+      devoluciones += totalVenta;
+      return;
     }
+
+    if (esPos) {
+      totalPos += totalVenta;
+      utilidadPos += utilidadVenta;
+      cantidadPos++;
+
+      if (!ventasPorDia[fecha]) ventasPorDia[fecha] = 0;
+      ventasPorDia[fecha] += totalVenta;
+
+      const metodo = venta.metodoPago || "No definido";
+      if (!metodos[metodo]) metodos[metodo] = { total: 0, cantidad: 0 };
+      metodos[metodo].total += totalVenta;
+      metodos[metodo].cantidad++;
+
+      (venta.productos || []).forEach((p) => {
+        const cantidad = Number(p.cantidad || 0);
+        const nombre = p.nombre || "Producto";
+        inversion += Number(p.costo || 0) * cantidad;
+        productosVendidos[nombre] = (productosVendidos[nombre] || 0) + cantidad;
+      });
+    } else {
+      totalServiciosCeo += totalVenta;
+    }
+
+    historial.push({ venta, fecha, fechaDate, totalVenta, utilidadVenta, origen });
+  });
+
+  totalVentas.textContent = dinero(totalPos);
+  cantidadVentas.textContent = `${cantidadPos} tickets`;
+  ticketPromedio.textContent = cantidadPos > 0 ? dinero(totalPos / cantidadPos) : "0.00";
+  totalUtilidad.textContent = dinero(utilidadPos);
+  totalInversion.textContent = dinero(inversion);
+  totalCeo.textContent = dinero(totalServiciosCeo);
+  totalDevoluciones.textContent = dinero(devoluciones);
+  margenPromedio.textContent = totalPos > 0 ? `${((utilidadPos / totalPos) * 100).toFixed(1)}%` : "0%";
+  canalPrincipal.textContent = totalPos >= totalServiciosCeo ? "POS" : "CEO";
+
+  reporteMetodosPago.innerHTML = "";
+  Object.entries(metodos).forEach(([nombre, datos]) => renderMetodo(nombre, datos.total, datos.cantidad));
+
+  const top = Object.entries(productosVendidos)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6);
+
+  productosTopReporte.innerHTML = "";
+  if (top.length === 0) {
+    agregarItem(productosTopReporte, "Sin ventas POS", "Aun no hay productos vendidos", "0 und.", "");
+    productoTop.textContent = "-";
+  } else {
+    productoTop.textContent = `${top[0][0]} (${top[0][1]} und.)`;
+    top.forEach(([nombre, cantidad], index) => {
+      agregarItem(productosTopReporte, nombre, `Puesto ${index + 1}`, `${cantidad} und.`, "Top");
+    });
   }
 
-  productoTop.textContent =
-    topProducto === "-" ? "-" : `${topProducto} (${topCantidad} unidades)`;
+  historialVentas.innerHTML = "";
+  historial
+    .sort((a, b) => b.fechaDate - a.fechaDate)
+    .slice(0, 12)
+    .forEach(({ venta, fecha, totalVenta, utilidadVenta, origen }) => {
+      const productos = (venta.productos || [])
+        .map((p) => `${p.nombre || "Producto"} x${p.cantidad || 0}`)
+        .join(", ");
+      agregarItem(
+        historialVentas,
+        productos || "Venta sin detalle",
+        `${fecha} - ${origen}`,
+        `S/${dinero(totalVenta)} | U: S/${dinero(utilidadVenta)}`,
+        origen
+      );
+    });
+
+  if (historial.length === 0) {
+    agregarItem(historialVentas, "Sin movimientos", "Aun no hay ventas registradas", "S/0.00", "");
+  }
 
   crearGraficoVentas(ventasPorDia);
 }
 
 function crearGraficoVentas(ventasPorDia) {
   const canvas = document.getElementById("graficoVentas");
-
-  if (!canvas) return;
+  if (!canvas || typeof Chart === "undefined") return;
 
   const labels = Object.keys(ventasPorDia);
   const valores = Object.values(ventasPorDia);
@@ -142,7 +206,7 @@ function crearGraficoVentas(ventasPorDia) {
     data: {
       labels,
       datasets: [{
-        label: "Ventas por dia (S/)",
+        label: "Ventas POS por dia (S/)",
         data: valores,
         borderWidth: 3,
         tension: 0.35

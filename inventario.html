@@ -19,40 +19,85 @@
     </div>
 
     <nav class="menu">
-      <a href="index.html">Dashboard</a>
+      <a href="index.html">Panel de control</a>
       <a class="active" href="inventario.html">Inventario</a>
-      <a href="ventas.html">Ventas</a>
+      <a href="ventas.html">Ventas CEO</a>
       <a href="reportes.html">Reportes</a>
       <a href="boletas.html">Boletas</a>
-      <button onclick="logout()">Cerrar sesión</button>
+      <button onclick="logout()">Cerrar sesion</button>
     </nav>
   </aside>
 
-  <main class="main">
-    <section class="topbar">
+  <main class="main inventory-page">
+    <section class="topbar control-topbar">
       <div>
-        <h2>Inventario</h2>
-        <p>Gestiona productos, precios y stock de XyberTechX.</p>
+        <h2>Inventario POS y Web</h2>
+        <p>Productos que alimentan el POS y la pagina PAGINA-XYBERTECHX.</p>
       </div>
-      <div class="user-box">Administrador</div>
+      <div class="control-actions">
+        <a href="pos/index.html">Abrir POS</a>
+        <a href="index.html">Centro de control</a>
+      </div>
     </section>
 
-    <section class="card full">
-      <h3>Agregar Producto</h3>
-
-      <div class="form-row inventory-form">
-  <input id="nombre" placeholder="Producto">
-  <input id="categoria" placeholder="Categoría">
-  <input id="costo" type="number" placeholder="Precio costo">
-  <input id="precio" type="number" placeholder="Precio venta">
-  <input id="stock" type="number" placeholder="Stock">
-  <button onclick="agregarProducto()">Guardar</button>
-</div>
+    <section class="inventory-summary">
+      <div class="mini-card">
+        <span>Total productos</span>
+        <strong id="totalProductos">0</strong>
+        <small>Registrados en inventario</small>
+      </div>
+      <div class="mini-card">
+        <span>Disponibles</span>
+        <strong id="productosDisponibles">0</strong>
+        <small>Listos para POS/web</small>
+      </div>
+      <div class="mini-card">
+        <span>Stock bajo</span>
+        <strong id="productosBajoStock">0</strong>
+        <small>Reponer pronto</small>
+      </div>
+      <div class="mini-card">
+        <span>Agotados</span>
+        <strong id="productosAgotados">0</strong>
+        <small>No vendibles</small>
+      </div>
     </section>
 
-    <section class="card full">
-      <h3>Lista de Productos</h3>
-      <ul id="lista"></ul>
+    <section class="card control-panel">
+      <div class="panel-heading">
+        <div>
+          <h3>Agregar producto</h3>
+          <p>El stock que registres aqui queda disponible para ventas POS y web.</p>
+        </div>
+      </div>
+
+      <div class="inventory-form">
+        <input id="nombre" placeholder="Producto">
+        <input id="categoria" placeholder="Categoria">
+        <input id="costo" type="number" min="0" step="0.01" placeholder="Costo">
+        <input id="precio" type="number" min="0" step="0.01" placeholder="Venta">
+        <input id="stock" type="number" min="0" step="1" placeholder="Stock">
+        <button onclick="agregarProducto()">Guardar</button>
+      </div>
+    </section>
+
+    <section class="card control-panel">
+      <div class="panel-heading inventory-toolbar">
+        <div>
+          <h3>Productos</h3>
+          <p>Busca, filtra y actualiza precios o stock.</p>
+        </div>
+        <div class="toolbar-controls">
+          <input id="buscarInventario" placeholder="Buscar producto o categoria">
+          <select id="filtroInventario">
+            <option value="todos">Todos</option>
+            <option value="disponibles">Disponibles</option>
+            <option value="bajo">Stock bajo</option>
+            <option value="agotados">Agotados</option>
+          </select>
+        </div>
+      </div>
+      <ul id="lista" class="inventory-list"></ul>
     </section>
   </main>
 

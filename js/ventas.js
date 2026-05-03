@@ -3,8 +3,12 @@ import {
   collection,
   doc,
   getDocs,
+  limit,
+  orderBy,
+  query,
   runTransaction,
-  serverTimestamp
+  serverTimestamp,
+  where
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const select = document.getElementById("producto");
@@ -13,6 +17,10 @@ const utilidadSpan = document.getElementById("utilidad");
 const itemsTotal = document.getElementById("itemsTotal");
 const carritoLista = document.getElementById("carritoLista");
 const listaVentas = document.getElementById("listaVentas");
+const ventasCeoCount = document.getElementById("ventasCeoCount");
+const clienteServicio = document.getElementById("clienteServicio");
+const metodoPagoCEO = document.getElementById("metodoPagoCEO");
+const notaVenta = document.getElementById("notaVenta");
 
 let productos = [];
 let carrito = [];
@@ -29,6 +37,48 @@ function fechaComoDate(fecha) {
   return isNaN(convertida.getTime()) ? null : convertida;
 }
 
+function rangoHoy() {
+  const hoy = new Date();
+  return {
+    inicio: new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()),
+    fin: new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + 1)
+  };
+}
+
+function agregarVacio(lista, texto) {
+  const li = document.createElement("li");
+  li.className = "empty-list";
+  li.textContent = texto;
+  lista.appendChild(li);
+}
+
+function agregarItemLista(lista, titulo, detalle, valor, badge) {
+  const li = document.createElement("li");
+
+  const texto = document.createElement("div");
+  const strong = document.createElement("strong");
+  strong.textContent = titulo;
+  const small = document.createElement("small");
+  small.textContent = detalle;
+  texto.append(strong, small);
+
+  const derecha = document.createElement("div");
+  derecha.className = "list-value";
+  const valorNode = document.createElement("span");
+  valorNode.textContent = valor;
+  derecha.appendChild(valorNode);
+
+  if (badge) {
+    const badgeNode = document.createElement("small");
+    badgeNode.className = "status-pill";
+    badgeNode.textContent = badge;
+    derecha.appendChild(badgeNode);
+  }
+
+  li.append(texto, derecha);
+  lista.appendChild(li);
+}
+
 async function cargarProductos() {
   const datos = await getDocs(collection(db, "inventario"));
 
@@ -38,12 +88,24 @@ async function cargarProductos() {
   datos.forEach((docu) => {
     const p = docu.data();
     productos.push({ id: docu.id, ...p });
-
-    const option = document.createElement("option");
-    option.value = docu.id;
-    option.textContent = `${p.nombre || "Producto"} - S/${p.precio || 0} (Stock: ${p.stock || 0})`;
-    select.appendChild(option);
   });
+
+  productos
+    .filter((p) => Number(p.stock || 0) > 0)
+    .sort((a, b) => String(a.nombre || "").localeCompare(String(b.nombre || "")))
+    .forEach((p) => {
+      const option = document.createElement("option");
+      option.value = p.id;
+      option.textContent = `${p.nombre || "Producto"} - S/${p.precio || 0} (Stock: ${p.stock || 0})`;
+      select.appendChild(option);
+    });
+
+  if (select.options.length === 0) {
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "Sin productos disponibles";
+    select.appendChild(option);
+  }
 }
 
 window.agregarAlCarrito = () => {
@@ -90,6 +152,10 @@ function renderCarrito() {
   let utilidad = 0;
   let items = 0;
 
+  if (carrito.length === 0) {
+    agregarVacio(carritoLista, "Agrega productos o repuestos usados en el servicio.");
+  }
+
   carrito.forEach((item, index) => {
     const subtotal = item.precio * item.cantidad;
     const ganancia = (item.precio - item.costo) * item.cantidad;
@@ -99,29 +165,21 @@ function renderCarrito() {
     items += item.cantidad;
 
     const li = document.createElement("li");
-    li.className = "cart-item";
 
     const detalle = document.createElement("div");
     const nombre = document.createElement("strong");
     nombre.textContent = item.nombre;
-    const cantidad = document.createElement("span");
-    cantidad.className = "badge";
-    cantidad.textContent = `x${item.cantidad}`;
+    const cantidad = document.createElement("small");
+    cantidad.textContent = `${item.categoria || "Producto"} | x${item.cantidad}`;
     detalle.append(nombre, cantidad);
 
-    const precioBox = document.createElement("div");
-    const precioLabel = document.createElement("small");
-    precioLabel.textContent = "Precio";
-    const precioValor = document.createElement("strong");
-    precioValor.textContent = `S/${dinero(item.precio)}`;
-    precioBox.append(precioLabel, precioValor);
-
-    const totalBox = document.createElement("div");
-    const totalLabel = document.createElement("small");
-    totalLabel.textContent = "Total";
-    const totalValor = document.createElement("strong");
-    totalValor.textContent = `S/${dinero(subtotal)}`;
-    totalBox.append(totalLabel, totalValor);
+    const valores = document.createElement("div");
+    valores.className = "list-value";
+    const totalItem = document.createElement("span");
+    totalItem.textContent = `S/${dinero(subtotal)}`;
+    const unitario = document.createElement("small");
+    unitario.textContent = `Unit. S/${dinero(item.precio)}`;
+    valores.append(totalItem, unitario);
 
     const btn = document.createElement("button");
     btn.textContent = "Quitar";
@@ -131,7 +189,7 @@ function renderCarrito() {
       renderCarrito();
     };
 
-    li.append(detalle, precioBox, totalBox, btn);
+    li.append(detalle, valores, btn);
     carritoLista.appendChild(li);
   });
 
@@ -142,60 +200,53 @@ function renderCarrito() {
 
 async function cargarVentasDelDia() {
   listaVentas.innerHTML = "";
+  const { inicio, fin } = rangoHoy();
+  const q = query(
+    collection(db, "ventas"),
+    where("fecha", ">=", inicio),
+    where("fecha", "<", fin),
+    orderBy("fecha", "desc"),
+    limit(30)
+  );
 
-  const hoy = new Date();
-  const inicioDia = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
-  const finDia = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + 1);
-  const datos = await getDocs(collection(db, "ventas"));
-
+  const datos = await getDocs(q);
   let ventasCount = 0;
 
   datos.forEach((docu) => {
     const venta = docu.data();
+    if (venta.origen !== "CEO" && venta.origen !== "Admin") return;
+
     const fechaVenta = fechaComoDate(venta.fecha);
-
-    if (!fechaVenta || fechaVenta < inicioDia || fechaVenta >= finDia) return;
-
     ventasCount++;
 
-    const li = document.createElement("li");
-    li.className = "sale-item";
+    const productos = (venta.productos || [])
+      .map((p) => `${p.nombre || "Producto"} x${p.cantidad || 0}`)
+      .join(", ");
 
-    const titulo = document.createElement("div");
-    const ventaLabel = document.createElement("strong");
-    ventaLabel.textContent = `Venta #${ventasCount}`;
-    const hora = document.createElement("small");
-    hora.textContent = fechaVenta.toLocaleTimeString();
-    titulo.append(ventaLabel, hora);
-
-    const totalBox = document.createElement("div");
-    const totalLabel = document.createElement("small");
-    totalLabel.textContent = "Total";
-    const totalValor = document.createElement("strong");
-    totalValor.textContent = `S/${dinero(venta.total)}`;
-    totalBox.append(totalLabel, totalValor);
-
-    const utilidadBox = document.createElement("div");
-    const utilidadLabel = document.createElement("small");
-    utilidadLabel.textContent = "Utilidad";
-    const utilidadValor = document.createElement("strong");
-    utilidadValor.textContent = `S/${dinero(venta.utilidad ?? venta.ganancia)}`;
-    utilidadBox.append(utilidadLabel, utilidadValor);
-
-    li.append(titulo, totalBox, utilidadBox);
-    listaVentas.prepend(li);
+    agregarItemLista(
+      listaVentas,
+      venta.cliente || "Servicio CEO",
+      `${fechaVenta ? fechaVenta.toLocaleTimeString() : "Sin hora"} - ${venta.metodoPago || "Sin metodo"}`,
+      `S/${dinero(venta.total)}`,
+      productos || "Servicio"
+    );
   });
 
+  ventasCeoCount.textContent = ventasCount;
+
   if (ventasCount === 0) {
-    const li = document.createElement("li");
-    li.textContent = "No hay ventas registradas hoy.";
-    listaVentas.appendChild(li);
+    agregarVacio(listaVentas, "No hay servicios CEO registrados hoy.");
   }
 }
 
 window.confirmarVenta = async () => {
   if (carrito.length === 0) {
-    alert("El carrito esta vacio");
+    alert("Agrega al menos un producto o repuesto al servicio.");
+    return;
+  }
+
+  if (!metodoPagoCEO.value) {
+    alert("Selecciona un metodo de pago.");
     return;
   }
 
@@ -224,6 +275,9 @@ window.confirmarVenta = async () => {
       }
 
       transaction.set(ventaRef, {
+        cliente: clienteServicio.value.trim() || "Cliente servicio CEO",
+        nota: notaVenta.value.trim(),
+        metodoPago: metodoPagoCEO.value,
         productos: carrito.map(item => ({
           ...item,
           subtotal: item.precio * item.cantidad,
@@ -234,7 +288,7 @@ window.confirmarVenta = async () => {
         utilidad: utilidadVenta,
         ganancia: utilidadVenta,
         fecha: serverTimestamp(),
-        origen: "Admin",
+        origen: "CEO",
         estado: "completada"
       });
 
@@ -249,9 +303,12 @@ window.confirmarVenta = async () => {
     return;
   }
 
-  alert("Venta registrada");
+  alert("Venta CEO registrada");
 
   carrito = [];
+  clienteServicio.value = "";
+  metodoPagoCEO.value = "";
+  notaVenta.value = "";
   renderCarrito();
   await cargarProductos();
   await cargarVentasDelDia();

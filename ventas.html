@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Ventas - XyberTechX</title>
+  <title>Ventas CEO - XyberTechX</title>
   <link rel="stylesheet" href="css/estilos.css">
 </head>
 <body>
@@ -19,74 +19,113 @@
     </div>
 
     <nav class="menu">
-      <a href="index.html">Dashboard</a>
+      <a href="index.html">Panel de control</a>
       <a href="inventario.html">Inventario</a>
-      <a class="active" href="ventas.html">Ventas</a>
+      <a class="active" href="ventas.html">Ventas CEO</a>
       <a href="reportes.html">Reportes</a>
       <a href="boletas.html">Boletas</a>
-      <button onclick="logout()">Cerrar sesión</button>
+      <button onclick="logout()">Cerrar sesion</button>
     </nav>
   </aside>
 
-  <main class="main">
-  <section class="topbar">
-    <div>
-      <h2>Ventas</h2>
-      <p>Registra ventas, calcula totales y descuenta stock automáticamente.</p>
-    </div>
-    <div class="user-box">Administrador</div>
-  </section>
-
-  <section class="sales-layout">
-
-    <div class="card sale-panel">
-      <h3>Nueva venta</h3>
-
-      <div class="sale-form">
-        <select id="producto"></select>
-        <input type="number" id="cantidad" placeholder="Cantidad" min="1">
-        <button onclick="agregarAlCarrito()">Agregar</button>
-        <button class="btn-danger full" onclick="vaciarCarrito()">Vaciar carrito</button>
+  <main class="main ceo-sales-page">
+    <section class="topbar control-topbar">
+      <div>
+        <h2>Ventas CEO</h2>
+        <p>Registra servicios a domicilio, repuestos usados y cobros fuera del mostrador POS.</p>
       </div>
-
-      <div class="sale-note">
-        Selecciona productos y confirma la venta cuando el carrito esté listo.
+      <div class="control-actions">
+        <a href="index.html">Centro de control</a>
+        <a href="boletas.html">Crear boleta</a>
       </div>
-    </div>
+    </section>
 
-    <div class="card sale-summary">
-      <h3>Resumen</h3>
-
-      <div class="summary-row">
-        <span>Ítems</span>
-        <strong id="itemsTotal">0</strong>
-      </div>
-
-      <div class="summary-row">
+    <section class="inventory-summary">
+      <div class="mini-card">
         <span>Total venta</span>
-        <strong>S/ <span id="total">0</span></strong>
+        <strong>S/ <span id="total">0.00</span></strong>
+        <small>Importe a cobrar</small>
       </div>
-
-      <div class="summary-row profit">
+      <div class="mini-card">
         <span>Utilidad estimada</span>
-        <strong>S/ <span id="utilidad">0</span></strong>
+        <strong>S/ <span id="utilidad">0.00</span></strong>
+        <small>Segun costo inventario</small>
+      </div>
+      <div class="mini-card">
+        <span>Items</span>
+        <strong id="itemsTotal">0</strong>
+        <small>Productos o repuestos</small>
+      </div>
+      <div class="mini-card">
+        <span>Ventas CEO hoy</span>
+        <strong id="ventasCeoCount">0</strong>
+        <small>Servicios registrados</small>
+      </div>
+    </section>
+
+    <section class="control-grid ceo-sale-grid">
+      <div class="card control-panel">
+        <div class="panel-heading">
+          <div>
+            <h3>Datos del servicio</h3>
+            <p>Informacion para identificar el trabajo realizado.</p>
+          </div>
+        </div>
+
+        <div class="ceo-service-form">
+          <input id="clienteServicio" placeholder="Cliente / empresa">
+          <select id="metodoPagoCEO">
+            <option value="">Metodo de pago</option>
+            <option value="Efectivo">Efectivo</option>
+            <option value="Yape">Yape</option>
+            <option value="Plin">Plin</option>
+            <option value="Transferencia">Transferencia</option>
+            <option value="Tarjeta">Tarjeta</option>
+          </select>
+          <input id="notaVenta" placeholder="Nota breve del servicio">
+        </div>
+
+        <div class="ceo-product-picker">
+          <select id="producto"></select>
+          <input type="number" id="cantidad" placeholder="Cantidad" min="1">
+          <button onclick="agregarAlCarrito()">Agregar</button>
+          <button class="btn-danger" onclick="vaciarCarrito()">Vaciar</button>
+        </div>
       </div>
 
-      <button class="confirm-sale" onclick="confirmarVenta()">Confirmar venta</button>
-    </div>
+      <aside class="card control-panel ceo-summary-card">
+        <div class="panel-heading">
+          <div>
+            <h3>Confirmacion</h3>
+            <p>Descuenta stock y guarda venta como canal CEO.</p>
+          </div>
+        </div>
+        <button class="confirm-sale" onclick="confirmarVenta()">Registrar venta CEO</button>
+      </aside>
+    </section>
 
-    <div class="card full">
-      <h3>Carrito</h3>
-      <ul id="carritoLista"></ul>
-    </div>
+    <section class="control-panels">
+      <div class="card control-panel">
+        <div class="panel-heading">
+          <div>
+            <h3>Carrito del servicio</h3>
+            <p>Repuestos o productos usados durante la atencion.</p>
+          </div>
+        </div>
+        <ul id="carritoLista" class="compact-list"></ul>
+      </div>
 
-    <div class="card full">
-      <h3>Ventas recientes</h3>
-      <ul id="listaVentas"></ul>
-    </div>
-
-  </section>
-</main>
+      <div class="card control-panel">
+        <div class="panel-heading">
+          <div>
+            <h3>Servicios CEO recientes</h3>
+            <p>Solo movimientos de hoy.</p>
+          </div>
+        </div>
+        <ul id="listaVentas" class="compact-list"></ul>
+      </div>
+    </section>
+  </main>
 
 </div>
 
