@@ -3,9 +3,9 @@ import { db } from "../firebase.js";
 import {
   collection,
   getDocs,
+  orderBy,
   query,
-  where,
-  orderBy
+  where
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const historialPOS = document.getElementById("historialPOS");
@@ -16,14 +16,17 @@ const btnLimpiar = document.getElementById("btnLimpiarFiltro");
 
 let ventasGlobal = [];
 
-function formatearFecha(fecha) {
-  if (!fecha) return "Sin fecha";
-  if (fecha.toDate) return fecha.toDate().toLocaleString("es-PE");
+function fechaComoDate(fecha) {
+  if (!fecha) return null;
+  if (fecha.toDate) return fecha.toDate();
 
   const fechaConvertida = new Date(fecha);
-  return isNaN(fechaConvertida.getTime())
-    ? "Sin fecha"
-    : fechaConvertida.toLocaleString("es-PE");
+  return isNaN(fechaConvertida.getTime()) ? null : fechaConvertida;
+}
+
+function formatearFecha(fecha) {
+  const fechaConvertida = fechaComoDate(fecha);
+  return fechaConvertida ? fechaConvertida.toLocaleString("es-PE") : "Sin fecha";
 }
 
 async function cargarHistorial() {
@@ -48,10 +51,12 @@ async function cargarHistorial() {
     });
 
     renderVentas(ventasGlobal);
-
   } catch (error) {
     console.error("Error cargando historial POS:", error);
-    historialPOS.innerHTML = "<p>Error al cargar historial.</p>";
+    historialPOS.innerHTML = "";
+    const p = document.createElement("p");
+    p.textContent = "Error al cargar historial.";
+    historialPOS.appendChild(p);
   }
 }
 
@@ -59,7 +64,9 @@ function renderVentas(lista) {
   historialPOS.innerHTML = "";
 
   if (lista.length === 0) {
-    historialPOS.innerHTML = "<p>No hay ventas en ese rango.</p>";
+    const p = document.createElement("p");
+    p.textContent = "No hay ventas en ese rango.";
+    historialPOS.appendChild(p);
     return;
   }
 
@@ -68,33 +75,38 @@ function renderVentas(lista) {
     div.classList.add("historial-pos-item");
 
     const productos = venta.productos || [];
-
     const resumenProductos = productos
-      .map(p => `${p.nombre} x${p.cantidad}`)
+      .map(p => `${p.nombre || "Producto"} x${p.cantidad || 0}`)
       .join(", ");
 
     const metodo = venta.metodoPago || "No definido";
 
-    const estado = venta.estado === "devuelta"
-      ? `<span class="estado-devuelta">Devuelta</span>`
-      : `<span class="estado-ok">Completada</span>`;
+    const detalle = document.createElement("div");
+    const resumen = document.createElement("strong");
+    resumen.textContent = resumenProductos || "Venta sin detalle";
+    const fecha = document.createElement("small");
+    fecha.textContent = formatearFecha(venta.fecha);
+    const pago = document.createElement("p");
+    pago.className = "metodo-pago";
+    pago.textContent = `Pago: ${metodo}`;
+    const estado = document.createElement("span");
+    estado.className = venta.estado === "devuelta" ? "estado-devuelta" : "estado-ok";
+    estado.textContent = venta.estado === "devuelta" ? "Devuelta" : "Completada";
+    detalle.append(resumen, fecha, pago, estado);
 
-    div.innerHTML = `
-      <div>
-        <strong>${resumenProductos || "Venta sin detalle"}</strong>
-        <small>${formatearFecha(venta.fecha)}</small>
-        <p class="metodo-pago">Pago: ${metodo}</p>
-        ${estado}
-      </div>
+    const total = document.createElement("div");
+    const totalLabel = document.createElement("span");
+    totalLabel.textContent = "Total";
+    const totalValor = document.createElement("strong");
+    totalValor.textContent = `S/${Number(venta.total || 0).toFixed(2)}`;
+    total.append(totalLabel, totalValor);
 
-      <div>
-        <span>Total</span>
-        <strong>S/${Number(venta.total || 0).toFixed(2)}</strong>
-      </div>
+    const ticket = document.createElement("a");
+    ticket.href = `ticket.html?id=${encodeURIComponent(venta.id)}`;
+    ticket.className = "btn-ticket";
+    ticket.textContent = "Ver ticket";
 
-      <a href="ticket.html?id=${venta.id}" class="btn-ticket">Ver ticket</a>
-    `;
-
+    div.append(detalle, total, ticket);
     historialPOS.appendChild(div);
   });
 }
@@ -108,11 +120,8 @@ function filtrarPorFecha() {
   }
 
   const filtradas = ventasGlobal.filter((venta) => {
-    if (!venta.fecha) return false;
-
-    const fechaVenta = venta.fecha.toDate
-      ? venta.fecha.toDate()
-      : new Date(venta.fecha);
+    const fechaVenta = fechaComoDate(venta.fecha);
+    if (!fechaVenta) return false;
 
     if (inicio && fechaVenta < inicio) return false;
     if (fin && fechaVenta > fin) return false;
@@ -132,4 +141,4 @@ function limpiarFiltro() {
 btnFiltrar.addEventListener("click", filtrarPorFecha);
 btnLimpiar.addEventListener("click", limpiarFiltro);
 
-cargarHistorial();  
+cargarHistorial();

@@ -13,20 +13,50 @@ const historialVentas = document.getElementById("historialVentas");
 const totalUtilidad = document.getElementById("totalUtilidad");
 const totalInversion = document.getElementById("totalInversion");
 
-function formatearFecha(fecha) {
-  if (!fecha) return "Sin fecha";
-
-  if (fecha.toDate) {
-    return fecha.toDate().toLocaleDateString("es-PE");
-  }
+function fechaComoDate(fecha) {
+  if (!fecha) return null;
+  if (fecha.toDate) return fecha.toDate();
 
   const fechaConvertida = new Date(fecha);
+  return isNaN(fechaConvertida.getTime()) ? null : fechaConvertida;
+}
 
-  if (isNaN(fechaConvertida.getTime())) {
-    return "Sin fecha";
-  }
+function formatearFecha(fecha) {
+  const fechaConvertida = fechaComoDate(fecha);
+  return fechaConvertida ? fechaConvertida.toLocaleDateString("es-PE") : "Sin fecha";
+}
 
-  return fechaConvertida.toLocaleDateString("es-PE");
+function agregarHistorial(venta, fecha, totalVenta, utilidadVenta) {
+  const productos = venta.productos || [];
+  const nombres = productos.length > 0
+    ? productos.map(p => `${p.nombre || "Producto"} x${p.cantidad || 0}`).join(", ")
+    : "Venta antigua sin detalle";
+
+  const li = document.createElement("li");
+
+  const detalle = document.createElement("div");
+  const nombre = document.createElement("strong");
+  nombre.textContent = nombres;
+  const fechaNode = document.createElement("small");
+  fechaNode.textContent = fecha;
+  detalle.append(nombre, fechaNode);
+
+  const totalBox = document.createElement("div");
+  const totalLabel = document.createElement("small");
+  totalLabel.textContent = "Total";
+  const totalValor = document.createElement("strong");
+  totalValor.textContent = `S/${totalVenta.toFixed(2)}`;
+  totalBox.append(totalLabel, totalValor);
+
+  const utilidadBox = document.createElement("div");
+  const utilidadLabel = document.createElement("small");
+  utilidadLabel.textContent = "Utilidad";
+  const utilidadValor = document.createElement("strong");
+  utilidadValor.textContent = `S/${utilidadVenta.toFixed(2)}`;
+  utilidadBox.append(utilidadLabel, utilidadValor);
+
+  li.append(detalle, totalBox, utilidadBox);
+  historialVentas.appendChild(li);
 }
 
 async function cargarReportes() {
@@ -43,9 +73,10 @@ async function cargarReportes() {
 
   ventasSnap.forEach((docu) => {
     const venta = docu.data();
+    if (venta.estado === "devuelta") return;
 
-    const totalVenta = venta.total || 0;
-    const utilidadVenta = venta.utilidad ?? venta.ganancia ?? 0;
+    const totalVenta = Number(venta.total || 0);
+    const utilidadVenta = Number(venta.utilidad ?? venta.ganancia ?? 0);
 
     total += totalVenta;
     utilidad += utilidadVenta;
@@ -62,36 +93,17 @@ async function cargarReportes() {
     const productos = venta.productos || [];
 
     productos.forEach((p) => {
-      inversion += (p.costo || 0) * (p.cantidad || 0);
+      inversion += Number(p.costo || 0) * Number(p.cantidad || 0);
 
-      if (!productosVendidos[p.nombre]) {
-        productosVendidos[p.nombre] = 0;
+      const nombreProducto = p.nombre || "Producto";
+      if (!productosVendidos[nombreProducto]) {
+        productosVendidos[nombreProducto] = 0;
       }
 
-      productosVendidos[p.nombre] += p.cantidad || 0;
+      productosVendidos[nombreProducto] += Number(p.cantidad || 0);
     });
 
-    const nombres = productos.length > 0
-      ? productos.map(p => `${p.nombre} x${p.cantidad}`).join(", ")
-      : "Venta antigua sin detalle";
-
-    const li = document.createElement("li");
-    li.innerHTML = `
-      <div>
-        <strong>${nombres}</strong>
-        <small>${fecha}</small>
-      </div>
-      <div>
-        <small>Total</small>
-        <strong>S/${totalVenta.toFixed(2)}</strong>
-      </div>
-      <div>
-        <small>Utilidad</small>
-        <strong>S/${utilidadVenta.toFixed(2)}</strong>
-      </div>
-    `;
-
-    historialVentas.appendChild(li);
+    agregarHistorial(venta, fecha, totalVenta, utilidadVenta);
   });
 
   totalVentas.textContent = total.toFixed(2);
@@ -130,7 +142,7 @@ function crearGraficoVentas(ventasPorDia) {
     data: {
       labels,
       datasets: [{
-        label: "Ventas por día (S/)",
+        label: "Ventas por dia (S/)",
         data: valores,
         borderWidth: 3,
         tension: 0.35

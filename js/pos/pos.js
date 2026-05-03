@@ -2,10 +2,10 @@ import { db } from "../firebase.js";
 
 import {
   collection,
+  doc,
   getDocs,
-  addDoc,
-  updateDoc,
-  doc
+  runTransaction,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const listaProductos = document.getElementById("listaProductos");
@@ -17,6 +17,18 @@ const metodoPago = document.getElementById("metodoPago");
 
 let productos = [];
 let carrito = [];
+
+function dinero(valor) {
+  return `S/${Number(valor || 0).toFixed(2)}`;
+}
+
+function setMensajeVacio(contenedor, texto) {
+  contenedor.innerHTML = "";
+  const p = document.createElement("p");
+  p.className = "carrito-vacio";
+  p.textContent = texto;
+  contenedor.appendChild(p);
+}
 
 async function cargarProductos() {
   try {
@@ -33,7 +45,7 @@ async function cargarProductos() {
     mostrarProductos(productos);
   } catch (error) {
     console.error("Error cargando productos:", error);
-    listaProductos.innerHTML = "<p>Error al cargar productos.</p>";
+    setMensajeVacio(listaProductos, "Error al cargar productos.");
   }
 }
 
@@ -41,27 +53,33 @@ function mostrarProductos(lista) {
   listaProductos.innerHTML = "";
 
   if (lista.length === 0) {
-    listaProductos.innerHTML = "<p>No hay productos disponibles.</p>";
+    setMensajeVacio(listaProductos, "No hay productos disponibles.");
     return;
   }
 
   lista.forEach((producto) => {
+    const stockProducto = Number(producto.stock || 0);
     const card = document.createElement("div");
     card.classList.add("producto-card");
 
-    card.innerHTML = `
-      <h3>${producto.nombre}</h3>
-      <p>Categoría: ${producto.categoria}</p>
-      <p>Stock: ${producto.stock}</p>
-      <strong>S/${Number(producto.precio).toFixed(2)}</strong>
-      <button ${producto.stock <= 0 ? "disabled" : ""}>
-        ${producto.stock <= 0 ? "Sin stock" : "Agregar"}
-      </button>
-    `;
+    const nombre = document.createElement("h3");
+    nombre.textContent = producto.nombre || "Producto sin nombre";
 
-    const boton = card.querySelector("button");
+    const categoria = document.createElement("p");
+    categoria.textContent = `Categoria: ${producto.categoria || "Sin categoria"}`;
+
+    const stock = document.createElement("p");
+    stock.textContent = `Stock: ${stockProducto}`;
+
+    const precio = document.createElement("strong");
+    precio.textContent = dinero(producto.precio);
+
+    const boton = document.createElement("button");
+    boton.disabled = stockProducto <= 0;
+    boton.textContent = boton.disabled ? "Sin stock" : "Agregar";
     boton.addEventListener("click", () => agregarAlCarrito(producto.id));
 
+    card.append(nombre, categoria, stock, precio, boton);
     listaProductos.appendChild(card);
   });
 }
@@ -71,10 +89,11 @@ function agregarAlCarrito(idProducto) {
   if (!producto) return;
 
   const productoEnCarrito = carrito.find((item) => item.id === idProducto);
+  const stockProducto = Number(producto.stock || 0);
 
   if (productoEnCarrito) {
-    if (productoEnCarrito.cantidad >= producto.stock) {
-      alert("No hay más stock disponible.");
+    if (productoEnCarrito.cantidad >= stockProducto) {
+      alert("No hay mas stock disponible.");
       return;
     }
 
@@ -82,11 +101,11 @@ function agregarAlCarrito(idProducto) {
   } else {
     carrito.push({
       id: producto.id,
-      nombre: producto.nombre,
-      categoria: producto.categoria,
-      precio: Number(producto.precio),
+      nombre: producto.nombre || "Producto",
+      categoria: producto.categoria || "",
+      precio: Number(producto.precio || 0),
       costo: Number(producto.costo || 0),
-      stock: Number(producto.stock),
+      stock: stockProducto,
       cantidad: 1
     });
   }
@@ -98,7 +117,7 @@ function renderCarrito() {
   carritoLista.innerHTML = "";
 
   if (carrito.length === 0) {
-    carritoLista.innerHTML = `<p class="carrito-vacio">No hay productos agregados.</p>`;
+    setMensajeVacio(carritoLista, "No hay productos agregados.");
     totalVenta.textContent = "S/0.00";
     return;
   }
@@ -112,28 +131,40 @@ function renderCarrito() {
     const div = document.createElement("div");
     div.classList.add("carrito-item");
 
-    div.innerHTML = `
-      <div>
-        <strong>${item.nombre}</strong>
-        <p>S/${item.precio.toFixed(2)} x ${item.cantidad}</p>
-      </div>
+    const detalle = document.createElement("div");
+    const nombre = document.createElement("strong");
+    nombre.textContent = item.nombre;
+    const precio = document.createElement("p");
+    precio.textContent = `${dinero(item.precio)} x ${item.cantidad}`;
+    detalle.append(nombre, precio);
 
-      <div class="carrito-actions">
-        <button class="btn-menos">-</button>
-        <span>${item.cantidad}</span>
-        <button class="btn-mas">+</button>
-        <button class="btn-eliminar">Eliminar</button>
-      </div>
-    `;
+    const acciones = document.createElement("div");
+    acciones.classList.add("carrito-actions");
 
-    div.querySelector(".btn-menos").addEventListener("click", () => disminuirCantidad(item.id));
-    div.querySelector(".btn-mas").addEventListener("click", () => aumentarCantidad(item.id));
-    div.querySelector(".btn-eliminar").addEventListener("click", () => eliminarDelCarrito(item.id));
+    const btnMenos = document.createElement("button");
+    btnMenos.classList.add("btn-menos");
+    btnMenos.textContent = "-";
+    btnMenos.addEventListener("click", () => disminuirCantidad(item.id));
 
+    const cantidad = document.createElement("span");
+    cantidad.textContent = item.cantidad;
+
+    const btnMas = document.createElement("button");
+    btnMas.classList.add("btn-mas");
+    btnMas.textContent = "+";
+    btnMas.addEventListener("click", () => aumentarCantidad(item.id));
+
+    const btnEliminar = document.createElement("button");
+    btnEliminar.classList.add("btn-eliminar");
+    btnEliminar.textContent = "Eliminar";
+    btnEliminar.addEventListener("click", () => eliminarDelCarrito(item.id));
+
+    acciones.append(btnMenos, cantidad, btnMas, btnEliminar);
+    div.append(detalle, acciones);
     carritoLista.appendChild(div);
   });
 
-  totalVenta.textContent = `S/${total.toFixed(2)}`;
+  totalVenta.textContent = dinero(total);
 }
 
 function aumentarCantidad(idProducto) {
@@ -141,7 +172,7 @@ function aumentarCantidad(idProducto) {
   if (!item) return;
 
   if (item.cantidad >= item.stock) {
-    alert("No hay más stock disponible.");
+    alert("No hay mas stock disponible.");
     return;
   }
 
@@ -169,12 +200,12 @@ function eliminarDelCarrito(idProducto) {
 
 async function procesarVenta() {
   if (carrito.length === 0) {
-    alert("El carrito está vacío.");
+    alert("El carrito esta vacio.");
     return;
   }
 
   if (!metodoPago.value) {
-    alert("Selecciona un método de pago.");
+    alert("Selecciona un metodo de pago.");
     return;
   }
 
@@ -183,14 +214,14 @@ async function procesarVenta() {
     btnCobrar.textContent = "Procesando...";
 
     let total = 0;
-    let ganancia = 0;
+    let utilidad = 0;
 
     const productosVenta = carrito.map((item) => {
       const subtotal = item.precio * item.cantidad;
-      const gananciaItem = (item.precio - item.costo) * item.cantidad;
+      const utilidadItem = (item.precio - item.costo) * item.cantidad;
 
       total += subtotal;
-      ganancia += gananciaItem;
+      utilidad += utilidadItem;
 
       return {
         id: item.id,
@@ -199,40 +230,59 @@ async function procesarVenta() {
         precio: item.precio,
         costo: item.costo,
         cantidad: item.cantidad,
-        subtotal: subtotal,
-        ganancia: gananciaItem
+        subtotal,
+        utilidad: utilidadItem,
+        ganancia: utilidadItem
       };
     });
 
-    const ventaRef = await addDoc(collection(db, "ventas"), {
-      fecha: new Date(),
-      productos: productosVenta,
-      total: total,
-      ganancia: ganancia,
-      metodoPago: metodoPago.value,
-      origen: "POS",
-      estado: "completada"
-    });
+    const ventaRef = doc(collection(db, "ventas"));
 
-    for (const item of carrito) {
-      const productoRef = doc(db, "inventario", item.id);
-      const nuevoStock = item.stock - item.cantidad;
+    await runTransaction(db, async (transaction) => {
+      const lecturas = [];
 
-      await updateDoc(productoRef, {
-        stock: nuevoStock
+      for (const item of carrito) {
+        const productoRef = doc(db, "inventario", item.id);
+        const productoSnap = await transaction.get(productoRef);
+
+        if (!productoSnap.exists()) {
+          throw new Error(`Producto no encontrado: ${item.nombre}`);
+        }
+
+        const stockActual = Number(productoSnap.data().stock || 0);
+        if (stockActual < item.cantidad) {
+          throw new Error(`Stock insuficiente para ${item.nombre}`);
+        }
+
+        lecturas.push({ productoRef, stockActual, item });
+      }
+
+      transaction.set(ventaRef, {
+        fecha: serverTimestamp(),
+        productos: productosVenta,
+        total,
+        utilidad,
+        ganancia: utilidad,
+        metodoPago: metodoPago.value,
+        origen: "POS",
+        estado: "completada"
       });
-    }
+
+      lecturas.forEach(({ productoRef, stockActual, item }) => {
+        transaction.update(productoRef, {
+          stock: stockActual - item.cantidad
+        });
+      });
+    });
 
     carrito = [];
     metodoPago.value = "";
     renderCarrito();
 
     window.location.href = `ticket.html?id=${ventaRef.id}`;
-    return;
-
   } catch (error) {
     console.error("Error al procesar venta:", error);
-    alert("Error al procesar la venta.");
+    alert(error.message || "Error al procesar la venta.");
   } finally {
     btnCobrar.disabled = false;
     btnCobrar.textContent = "Cobrar venta";
@@ -243,8 +293,8 @@ buscarProducto.addEventListener("input", () => {
   const texto = buscarProducto.value.toLowerCase();
 
   const filtrados = productos.filter((producto) =>
-    producto.nombre.toLowerCase().includes(texto) ||
-    producto.categoria.toLowerCase().includes(texto)
+    String(producto.nombre || "").toLowerCase().includes(texto) ||
+    String(producto.categoria || "").toLowerCase().includes(texto)
   );
 
   mostrarProductos(filtrados);

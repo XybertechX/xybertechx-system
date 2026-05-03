@@ -10,13 +10,27 @@ import {
 
 const lista = document.getElementById("lista");
 
-// Agregar producto
+function crearDato(label, valor) {
+  const div = document.createElement("div");
+  const small = document.createElement("small");
+  small.textContent = label;
+  const strong = document.createElement("strong");
+  strong.textContent = valor;
+  div.append(small, strong);
+  return div;
+}
+
 window.agregarProducto = async () => {
-  const nombre = document.getElementById("nombre").value;
-  const categoria = document.getElementById("categoria").value;
+  const nombre = document.getElementById("nombre").value.trim();
+  const categoria = document.getElementById("categoria").value.trim();
   const costo = Number(document.getElementById("costo").value);
   const precio = Number(document.getElementById("precio").value);
   const stock = Number(document.getElementById("stock").value);
+
+  if (!nombre || !categoria || costo < 0 || precio <= 0 || stock < 0) {
+    alert("Completa producto, categoria, precio y stock con valores validos.");
+    return;
+  }
 
   await addDoc(collection(db, "inventario"), {
     nombre,
@@ -26,11 +40,16 @@ window.agregarProducto = async () => {
     stock
   });
 
+  document.getElementById("nombre").value = "";
+  document.getElementById("categoria").value = "";
+  document.getElementById("costo").value = "";
+  document.getElementById("precio").value = "";
+  document.getElementById("stock").value = "";
+
   alert("Producto guardado");
   cargarProductos();
 };
 
-// Mostrar productos
 async function cargarProductos() {
   lista.innerHTML = "";
 
@@ -38,42 +57,24 @@ async function cargarProductos() {
 
   datos.forEach((documento) => {
     const p = documento.data();
-    const ganancia = (p.precio || 0) - (p.costo || 0);
-    const estado = p.stock <= 5 ? "Stock bajo" : "Disponible";
+    const ganancia = Number(p.precio || 0) - Number(p.costo || 0);
+    const estado = Number(p.stock || 0) <= 5 ? "Stock bajo" : "Disponible";
 
     const li = document.createElement("li");
     li.className = "inventory-item";
 
-    li.innerHTML = `
-      <div>
-        <strong>${p.nombre}</strong>
-        <span>${p.categoria || "Sin categoría"}</span>
-      </div>
+    const producto = document.createElement("div");
+    const nombre = document.createElement("strong");
+    nombre.textContent = p.nombre || "Producto sin nombre";
+    const categoria = document.createElement("span");
+    categoria.textContent = p.categoria || "Sin categoria";
+    producto.append(nombre, categoria);
 
-      <div>
-        <small>Costo</small>
-        <strong>S/${p.costo || 0}</strong>
-      </div>
-
-      <div>
-        <small>Venta</small>
-        <strong>S/${p.precio || 0}</strong>
-      </div>
-
-      <div>
-        <small>Ganancia</small>
-        <strong>S/${ganancia}</strong>
-      </div>
-
-      <div>
-        <small>Stock</small>
-        <strong>${p.stock}</strong>
-      </div>
-
-      <div>
-        <span class="badge">${estado}</span>
-      </div>
-    `;
+    const estadoBox = document.createElement("div");
+    const badge = document.createElement("span");
+    badge.className = "badge";
+    badge.textContent = estado;
+    estadoBox.appendChild(badge);
 
     const acciones = document.createElement("div");
     acciones.className = "actions";
@@ -85,14 +86,22 @@ async function cargarProductos() {
       const nuevoPrecio = prompt("Nuevo precio venta:", p.precio);
       const nuevoStock = prompt("Nuevo stock:", p.stock);
 
-      if (nuevoPrecio !== null && nuevoStock !== null) {
-        await updateDoc(doc(db, "inventario", documento.id), {
-          precio: Number(nuevoPrecio),
-          stock: Number(nuevoStock)
-        });
+      if (nuevoPrecio === null || nuevoStock === null) return;
 
-        cargarProductos();
+      const precioActualizado = Number(nuevoPrecio);
+      const stockActualizado = Number(nuevoStock);
+
+      if (precioActualizado <= 0 || stockActualizado < 0) {
+        alert("Precio y stock deben ser valores validos.");
+        return;
       }
+
+      await updateDoc(doc(db, "inventario", documento.id), {
+        precio: precioActualizado,
+        stock: stockActualizado
+      });
+
+      cargarProductos();
     };
 
     const btnEliminar = document.createElement("button");
@@ -100,16 +109,24 @@ async function cargarProductos() {
     btnEliminar.className = "btn-danger";
 
     btnEliminar.onclick = async () => {
+      if (!confirm(`Eliminar ${p.nombre || "este producto"}?`)) return;
+
       await deleteDoc(doc(db, "inventario", documento.id));
       cargarProductos();
     };
 
-    acciones.appendChild(btnEditar);
-    acciones.appendChild(btnEliminar);
-    li.appendChild(acciones);
+    acciones.append(btnEditar, btnEliminar);
+    li.append(
+      producto,
+      crearDato("Costo", `S/${Number(p.costo || 0).toFixed(2)}`),
+      crearDato("Venta", `S/${Number(p.precio || 0).toFixed(2)}`),
+      crearDato("Ganancia", `S/${ganancia.toFixed(2)}`),
+      crearDato("Stock", Number(p.stock || 0)),
+      estadoBox,
+      acciones
+    );
     lista.appendChild(li);
   });
 }
 
-// Cargar productos al abrir la página
 cargarProductos();

@@ -13,20 +13,41 @@ const ticketFecha = document.getElementById("ticketFecha");
 const ticketProductos = document.getElementById("ticketProductos");
 const ticketTotal = document.getElementById("ticketTotal");
 
-function formatearFecha(fecha) {
-  if (!fecha) return "Sin fecha";
-
-  if (fecha.toDate) {
-    return fecha.toDate().toLocaleString("es-PE");
-  }
+function fechaComoDate(fecha) {
+  if (!fecha) return null;
+  if (fecha.toDate) return fecha.toDate();
 
   const fechaConvertida = new Date(fecha);
+  return isNaN(fechaConvertida.getTime()) ? null : fechaConvertida;
+}
 
-  if (isNaN(fechaConvertida.getTime())) {
-    return "Sin fecha";
-  }
+function formatearFecha(fecha) {
+  const fechaConvertida = fechaComoDate(fecha);
+  return fechaConvertida ? fechaConvertida.toLocaleString("es-PE") : "Sin fecha";
+}
 
-  return fechaConvertida.toLocaleString("es-PE");
+function agregarProductoTicket(p) {
+  const div = document.createElement("div");
+  div.classList.add("ticket-producto");
+
+  const detalle = document.createElement("div");
+  const nombre = document.createElement("strong");
+  nombre.textContent = p.nombre || "Producto";
+  const categoria = document.createElement("small");
+  categoria.textContent = p.categoria || "Producto";
+  detalle.append(nombre, categoria);
+
+  const cantidad = document.createElement("span");
+  cantidad.textContent = Number(p.cantidad || 0);
+
+  const precio = document.createElement("span");
+  precio.textContent = `S/${Number(p.precio || 0).toFixed(2)}`;
+
+  const subtotal = document.createElement("span");
+  subtotal.textContent = `S/${Number(p.subtotal || p.precio * p.cantidad || 0).toFixed(2)}`;
+
+  div.append(detalle, cantidad, precio, subtotal);
+  ticketProductos.appendChild(div);
 }
 
 async function cargarTicket() {
@@ -54,23 +75,7 @@ async function cargarTicket() {
   ticketProductos.innerHTML = "";
 
   const productos = venta.productos || [];
-
-  productos.forEach((p) => {
-    const div = document.createElement("div");
-    div.classList.add("ticket-producto");
-
-    div.innerHTML = `
-  <div>
-    <strong>${p.nombre}</strong>
-    <small>${p.categoria || "Producto"}</small>
-  </div>
-  <span>${p.cantidad}</span>
-  <span>S/${Number(p.precio).toFixed(2)}</span>
-  <span>S/${Number(p.subtotal || p.precio * p.cantidad).toFixed(2)}</span>
-`;
-
-    ticketProductos.appendChild(div);
-  });
+  productos.forEach(agregarProductoTicket);
 }
 
 cargarTicket();

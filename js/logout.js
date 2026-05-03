@@ -1,23 +1,14 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { auth } from "./firebase.js";
 import {
-  getAuth,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyClnb_ATPTTWglNPDB7ifHgO8wgGEnPMp0",
-  authDomain: "xybertechx-system.firebaseapp.com",
-  projectId: "xybertechx-system",
-  storageBucket: "xybertechx-system.firebasestorage.app",
-  messagingSenderId: "208205329621",
-  appId: "1:208205329621:web:ecd69b2cfb62e123c6de5c"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+function loginPath() {
+  return window.location.pathname.includes("/pos/") ? "../login.html" : "login.html";
+}
 
 window.logout = async () => {
   await signOut(auth);
-  alert("Sesión cerrada 👋");
-  window.location.href = "login.html";
+  alert("Sesion cerrada");
+  window.location.href = loginPath();
 };

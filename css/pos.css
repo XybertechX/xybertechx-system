@@ -44,16 +44,23 @@ body {
   gap: 14px;
 }
 
-.pos-sidebar nav a {
+.pos-sidebar nav a,
+.pos-sidebar nav button {
   color: #fff;
   text-decoration: none;
   padding: 16px 20px;
   border-radius: 16px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
   font-weight: 700;
+  text-align: left;
 }
 
 .pos-sidebar nav a.active,
-.pos-sidebar nav a:hover {
+.pos-sidebar nav a:hover,
+.pos-sidebar nav button:hover {
   background: linear-gradient(135deg, #315cff, #a64dff);
 }
 

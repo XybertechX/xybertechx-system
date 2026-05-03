@@ -18,6 +18,40 @@ const mensajeVentas = document.getElementById("mensajeVentas");
 
 const metaDiaria = 100;
 
+function fechaComoDate(fecha) {
+  if (!fecha) return null;
+  if (fecha.toDate) return fecha.toDate();
+
+  const convertida = new Date(fecha);
+  return isNaN(convertida.getTime()) ? null : convertida;
+}
+
+function mismaFecha(a, b) {
+  return a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate();
+}
+
+function agregarVentaReciente(venta, fechaVenta) {
+  const li = document.createElement("li");
+  const nombres = venta.productos?.length
+    ? venta.productos.map(p => `${p.nombre || "Producto"} x${p.cantidad || 0}`).join(", ")
+    : "Venta antigua";
+
+  const detalle = document.createElement("div");
+  const nombre = document.createElement("strong");
+  nombre.textContent = nombres;
+  const fecha = document.createElement("small");
+  fecha.textContent = fechaVenta.toLocaleDateString();
+  detalle.append(nombre, fecha);
+
+  const total = document.createElement("div");
+  total.textContent = `S/${Number(venta.total || 0).toFixed(2)}`;
+
+  li.append(detalle, total);
+  ultimasVentas.prepend(li);
+}
+
 async function cargarDashboard() {
   const ventasSnap = await getDocs(collection(db, "ventas"));
   const inventarioSnap = await getDocs(collection(db, "inventario"));
@@ -31,38 +65,24 @@ async function cargarDashboard() {
   const fechaAyer = new Date();
   fechaAyer.setDate(fechaHoy.getDate() - 1);
 
-  const hoyTexto = fechaHoy.toLocaleDateString();
-  const ayerTexto = fechaAyer.toLocaleDateString();
-
   ultimasVentas.innerHTML = "";
 
   ventasSnap.forEach((docu) => {
     const venta = docu.data();
-    const fechaVenta = new Date(venta.fecha).toLocaleDateString();
+    if (venta.estado === "devuelta") return;
 
-    if (fechaVenta === hoyTexto) {
-      ventasHoy += venta.total || 0;
-      gananciaHoy += venta.utilidad || 0;
+    const fechaVenta = fechaComoDate(venta.fecha);
+    if (!fechaVenta) return;
+
+    if (mismaFecha(fechaVenta, fechaHoy)) {
+      ventasHoy += Number(venta.total || 0);
+      gananciaHoy += Number(venta.utilidad ?? venta.ganancia ?? 0);
       cantidadVentas++;
-
-      const nombres = venta.productos
-        ? venta.productos.map(p => `${p.nombre} x${p.cantidad}`).join(", ")
-        : "Venta antigua";
-
-      const li = document.createElement("li");
-      li.innerHTML = `
-        <div>
-          <strong>${nombres}</strong>
-          <small>${fechaVenta}</small>
-        </div>
-        <div>S/${(venta.total || 0).toFixed(2)}</div>
-      `;
-
-      ultimasVentas.prepend(li);
+      agregarVentaReciente(venta, fechaVenta);
     }
 
-    if (fechaVenta === ayerTexto) {
-      ventasAyer += venta.total || 0;
+    if (mismaFecha(fechaVenta, fechaAyer)) {
+      ventasAyer += Number(venta.total || 0);
     }
   });
 
@@ -71,17 +91,13 @@ async function cargarDashboard() {
   inventarioSnap.forEach((docu) => {
     const p = docu.data();
 
-    if ((p.stock || 0) <= 5) {
+    if (Number(p.stock || 0) <= 5) {
       stockBajo++;
     }
   });
 
   const diferencia = ventasHoy - ventasAyer;
-
-  let variacion = 0;
-  if (ventasAyer > 0) {
-    variacion = (diferencia / ventasAyer) * 100;
-  }
+  const variacion = ventasAyer > 0 ? (diferencia / ventasAyer) * 100 : 0;
 
   ventasHoySpan.textContent = ventasHoy.toFixed(2);
   gananciaHoySpan.textContent = gananciaHoy.toFixed(2);
@@ -105,7 +121,9 @@ async function cargarDashboard() {
   }
 
   if (cantidadVentas === 0) {
-    ultimasVentas.innerHTML = `<li>No hay ventas registradas hoy.</li>`;
+    const li = document.createElement("li");
+    li.textContent = "No hay ventas registradas hoy.";
+    ultimasVentas.appendChild(li);
   }
 }
 
