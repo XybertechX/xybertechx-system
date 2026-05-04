@@ -162,17 +162,24 @@ window.generarPDF = async () => {
   logo.onload = () => {
     const margen = 14;
     const ancho = 182;
-    let y = 16;
+    let y = 18;
 
     const azul = [37, 99, 235];
     const azulOscuro = [5, 10, 24];
     const texto = [15, 23, 42];
-    const suave = [248, 250, 252];
-    const borde = [226, 232, 240];
+    const suave = [241, 247, 255];
+    const borde = [191, 219, 254];
 
     const setColor = (color) => doc.setTextColor(color[0], color[1], color[2]);
     const setFill = (color) => doc.setFillColor(color[0], color[1], color[2]);
     const setDraw = (color) => doc.setDrawColor(color[0], color[1], color[2]);
+
+    const fondoPagina = () => {
+      setFill([229, 239, 255]);
+      doc.rect(0, 0, 210, 297, "F");
+      setFill([247, 251, 255]);
+      doc.roundedRect(9, 52, 192, 226, 6, 6, "F");
+    };
 
     const footer = () => {
       setFill(azulOscuro);
@@ -189,7 +196,8 @@ window.generarPDF = async () => {
       if (y + alto <= 278) return;
       footer();
       doc.addPage();
-      y = 16;
+      fondoPagina();
+      y = 18;
     };
 
     const etiqueta = (label, value, x, yy, max = 42) => {
@@ -203,50 +211,78 @@ window.generarPDF = async () => {
       doc.text(textoCorto(value, max), x, yy + 7);
     };
 
+    fondoPagina();
     setFill(azulOscuro);
-    doc.rect(0, 0, 210, 44, "F");
+    doc.rect(0, 0, 210, 48, "F");
     setFill(azul);
-    doc.rect(0, 42, 210, 2, "F");
-    doc.addImage(logo, "PNG", margen, 9, 24, 24);
+    doc.rect(0, 46, 210, 3, "F");
+    doc.addImage(logo, "PNG", margen, 8, 26, 26);
 
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
-    doc.text("XYBERTECHX TECHNOLOGY", 44, 18);
+    doc.text("XYBERTECHX TECHNOLOGY", 46, 18);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
-    doc.text("Servicios tecnicos, ventas, mantenimiento y armado de PC", 44, 28);
-    doc.text("Cel: 973 518 710 | xybertechxtechnology@gmail.com", 44, 36);
+    doc.text("Soluciones tecnicas, ventas, mantenimiento y armado de PC", 46, 28);
+    doc.text("Cel: 973 518 710 | xybertechxtechnology@gmail.com", 46, 37);
 
     setFill([14, 165, 233]);
-    doc.roundedRect(150, 10, 46, 23, 3, 3, "F");
+    doc.roundedRect(148, 9, 48, 25, 3, 3, "F");
     doc.setFont("helvetica", "bold");
     doc.setFontSize(7.5);
-    doc.text("DOCUMENTO", 158, 19);
+    doc.text("DOCUMENTO", 157, 18);
     doc.setFontSize(10.5);
-    doc.text("BOLETA SIMPLE", 158, 27);
+    doc.text("BOLETA SIMPLE", 157, 27);
 
-    y = 56;
+    y = 64;
     setColor(texto);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
+    doc.setFontSize(16);
     doc.text("Cotizacion / Boleta simple", margen, y);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
+    doc.setFontSize(8.5);
     doc.setTextColor(71, 85, 105);
     doc.text(`Fecha: ${fecha}`, 196, y, { align: "right" });
+    doc.text("Documento referencial para confirmacion de servicio, producto o entrega.", margen, y + 8);
 
-    y += 12;
+    y += 17;
+    setFill([219, 234, 254]);
+    setDraw([147, 197, 253]);
+    doc.roundedRect(margen, y, ancho, 18, 5, 5, "FD");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(30, 64, 175);
+    doc.text("TOTAL PROPUESTO", 22, y + 7);
+    doc.setFontSize(12);
+    doc.text(`S/${dinero(totalFinal)}`, 22, y + 15);
+    doc.setFontSize(8);
+    doc.text("VALIDEZ", 93, y + 7);
+    doc.setFontSize(10);
+    doc.text(`${validez} dias`, 93, y + 15);
+    doc.setFontSize(8);
+    doc.text("ATENCION", 142, y + 7);
+    doc.setFontSize(9);
+    doc.text("Previa coordinacion", 142, y + 15);
+
+    y += 29;
     setFill(suave);
     setDraw(borde);
-    doc.roundedRect(margen, y, ancho, 30, 4, 4, "FD");
-    etiqueta("Cliente", cliente, 20, y + 10, 34);
-    etiqueta("Telefono", telefono, 20, y + 22, 24);
-    etiqueta("Tipo", tipoCotizacion, 86, y + 10, 32);
-    etiqueta("Asesor", asesor, 86, y + 22, 32);
-    etiqueta("Validez", `${validez} dias`, 158, y + 10, 18);
+    doc.roundedRect(margen, y, ancho, 34, 4, 4, "FD");
+    etiqueta("Cliente", cliente, 21, y + 11, 34);
+    etiqueta("Telefono", telefono, 21, y + 25, 24);
+    etiqueta("Tipo de atencion", tipoCotizacion, 84, y + 11, 34);
+    etiqueta("Responsable", asesor, 84, y + 25, 34);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.5);
+    doc.setTextColor(100, 116, 139);
+    doc.text("ALCANCE", 150, y + 11);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    setColor(texto);
+    doc.text(doc.splitTextToSize("Servicio sujeto a disponibilidad, revision y coordinacion con el cliente.", 38), 150, y + 18);
 
-    y += 44;
+    y += 47;
     setFill(azul);
     doc.roundedRect(margen, y, ancho, 10, 2, 2, "F");
     doc.setTextColor(255, 255, 255);
@@ -264,7 +300,10 @@ window.generarPDF = async () => {
       saltarSiHaceFalta(alto + 2);
 
       if (index % 2 === 0) {
-        setFill([250, 252, 255]);
+        setFill([255, 255, 255]);
+        doc.rect(margen, y - 5, ancho, alto, "F");
+      } else {
+        setFill([241, 247, 255]);
         doc.rect(margen, y - 5, ancho, alto, "F");
       }
 
@@ -281,7 +320,7 @@ window.generarPDF = async () => {
     y += 8;
     saltarSiHaceFalta(52);
 
-    setFill([239, 246, 255]);
+    setFill([219, 234, 254]);
     setDraw([191, 219, 254]);
     doc.roundedRect(margen, y, 103, 43, 4, 4, "FD");
     doc.setFont("helvetica", "bold");
@@ -297,7 +336,7 @@ window.generarPDF = async () => {
     doc.setTextColor(100, 116, 139);
     doc.text("Enviar comprobante para confirmar.", 20, y + 40);
 
-    setFill(suave);
+    setFill([255, 255, 255]);
     setDraw(borde);
     doc.roundedRect(124, y, 72, 43, 4, 4, "FD");
     doc.setFont("helvetica", "normal");
@@ -307,7 +346,7 @@ window.generarPDF = async () => {
     doc.text(`S/${dinero(subtotal)}`, 189, y + 11, { align: "right" });
     doc.text("Descuento", 132, y + 20);
     doc.text(`S/${dinero(descuento)}`, 189, y + 20, { align: "right" });
-    setFill(azul);
+    setFill([29, 78, 216]);
     doc.roundedRect(130, y + 27, 60, 11, 3, 3, "F");
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
@@ -315,10 +354,10 @@ window.generarPDF = async () => {
     doc.text(`TOTAL: S/${dinero(totalFinal)}`, 160, y + 34.5, { align: "center" });
 
     y += 57;
-    saltarSiHaceFalta(notas ? 58 : 37);
+    saltarSiHaceFalta(notas ? 68 : 48);
     setDraw(borde);
-    setFill([255, 255, 255]);
-    doc.roundedRect(margen, y, ancho, 32, 4, 4, "FD");
+    setFill([241, 247, 255]);
+    doc.roundedRect(margen, y, ancho, 42, 4, 4, "FD");
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9.5);
     setColor(texto);
@@ -327,8 +366,9 @@ window.generarPDF = async () => {
     doc.setFontSize(8);
     doc.setTextColor(71, 85, 105);
     doc.text(`Valido por ${validez} dias desde su emision.`, 20, y + 17);
-    doc.text("Precios sujetos a disponibilidad de productos, repuestos o proveedor.", 20, y + 23);
-    doc.text("Garantia segun condiciones del servicio, producto o proveedor.", 20, y + 29);
+    doc.text("El trabajo inicia o se reserva al confirmar el pago o adelanto coordinado.", 20, y + 23);
+    doc.text("Precios sujetos a disponibilidad de productos, repuestos o proveedor.", 20, y + 29);
+    doc.text("Garantia segun condiciones del servicio, producto o proveedor.", 20, y + 35);
 
     if (notas) {
       y += 42;
