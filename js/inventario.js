@@ -48,6 +48,29 @@ function crearDato(label, valor) {
   return div;
 }
 
+function crearPlaceholderImagen() {
+  const placeholder = document.createElement("div");
+  placeholder.className = "inventory-thumb-placeholder";
+  const label = document.createElement("span");
+  label.textContent = "Sin imagen";
+  placeholder.appendChild(label);
+  return placeholder;
+}
+
+function crearMiniatura(producto, imagen) {
+  if (!imagen) return crearPlaceholderImagen();
+
+  const thumb = document.createElement("img");
+  thumb.className = "inventory-thumb";
+  thumb.src = imagen;
+  thumb.alt = producto.nombre || "Producto";
+  thumb.loading = "lazy";
+  thumb.onerror = () => {
+    thumb.replaceWith(crearPlaceholderImagen());
+  };
+  return thumb;
+}
+
 function actualizarResumen() {
   const bajo = productos.filter((p) => Number(p.stock || 0) > 0 && Number(p.stock || 0) <= 5);
   const agotados = productos.filter((p) => Number(p.stock || 0) <= 0);
@@ -186,14 +209,7 @@ function renderProductos() {
     const productoVista = document.createElement("div");
     productoVista.className = "inventory-product-wrap";
 
-    const thumb = document.createElement("img");
-    thumb.className = "inventory-thumb";
-    thumb.src = imagen || "img/logo 2.0.png";
-    thumb.alt = producto.nombre || "Producto";
-    thumb.loading = "lazy";
-    thumb.onerror = () => {
-      thumb.src = "img/logo 2.0.png";
-    };
+    const thumb = crearMiniatura(producto, imagen);
 
     const info = document.createElement("div");
     info.className = "inventory-product";
