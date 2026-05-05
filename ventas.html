@@ -87,7 +87,11 @@
         </div>
 
         <div class="ceo-product-picker">
-          <select id="producto"></select>
+          <div class="product-combobox">
+            <input id="productoBusqueda" placeholder="Buscar producto o repuesto">
+            <input type="hidden" id="producto">
+            <div id="productoResultados" class="product-results"></div>
+          </div>
           <input type="number" id="cantidad" placeholder="Cantidad" min="1">
           <button onclick="agregarAlCarrito()">Agregar</button>
           <button class="btn-danger" onclick="vaciarCarrito()">Vaciar</button>

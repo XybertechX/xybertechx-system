@@ -11,7 +11,9 @@ import {
   where
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const select = document.getElementById("producto");
+const productoSeleccionado = document.getElementById("producto");
+const productoBusqueda = document.getElementById("productoBusqueda");
+const productoResultados = document.getElementById("productoResultados");
 const totalSpan = document.getElementById("total");
 const utilidadSpan = document.getElementById("utilidad");
 const itemsTotal = document.getElementById("itemsTotal");
@@ -27,6 +29,10 @@ let carrito = [];
 
 function dinero(valor) {
   return Number(valor || 0).toFixed(2);
+}
+
+function textoProducto(producto) {
+  return `${producto.nombre || "Producto"} - S/${dinero(producto.precio)} (Stock: ${producto.stock || 0})`;
 }
 
 function fechaComoDate(fecha) {
@@ -83,37 +89,86 @@ async function cargarProductos() {
   const datos = await getDocs(collection(db, "inventario"));
 
   productos = [];
-  select.innerHTML = "";
+  productoSeleccionado.value = "";
 
   datos.forEach((docu) => {
     const p = docu.data();
     productos.push({ id: docu.id, ...p });
   });
 
-  productos
+  productos = productos
     .filter((p) => Number(p.stock || 0) > 0)
-    .sort((a, b) => String(a.nombre || "").localeCompare(String(b.nombre || "")))
-    .forEach((p) => {
-      const option = document.createElement("option");
-      option.value = p.id;
-      option.textContent = `${p.nombre || "Producto"} - S/${p.precio || 0} (Stock: ${p.stock || 0})`;
-      select.appendChild(option);
-    });
+    .sort((a, b) => String(a.nombre || "").localeCompare(String(b.nombre || "")));
 
-  if (select.options.length === 0) {
-    const option = document.createElement("option");
-    option.value = "";
-    option.textContent = "Sin productos disponibles";
-    select.appendChild(option);
+  renderResultadosProducto(productos.slice(0, 8));
+}
+
+function renderResultadosProducto(lista) {
+  productoResultados.innerHTML = "";
+
+  if (lista.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "product-empty";
+    empty.textContent = "Sin productos disponibles.";
+    productoResultados.appendChild(empty);
+    return;
   }
+
+  lista.forEach((p) => {
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.className = "product-option";
+    boton.onclick = () => seleccionarProducto(p.id);
+
+    const info = document.createElement("span");
+    const nombre = document.createElement("strong");
+    nombre.textContent = p.nombre || "Producto";
+    const meta = document.createElement("small");
+    meta.textContent = `${p.categoria || "Inventario"} | Stock ${p.stock || 0}`;
+    info.append(nombre, meta);
+
+    const precio = document.createElement("em");
+    precio.textContent = `S/${dinero(p.precio)}`;
+
+    boton.append(info, precio);
+    productoResultados.appendChild(boton);
+  });
+}
+
+function seleccionarProducto(id) {
+  const producto = productos.find(p => p.id === id);
+  if (!producto) return;
+
+  productoSeleccionado.value = producto.id;
+  productoBusqueda.value = textoProducto(producto);
+  renderResultadosProducto([producto]);
+}
+
+function filtrarProductosCEO() {
+  const termino = productoBusqueda.value.trim().toLowerCase();
+  const filtrados = productos.filter((p) => {
+    const nombre = String(p.nombre || "").toLowerCase();
+    const categoria = String(p.categoria || "").toLowerCase();
+    const texto = textoProducto(p).toLowerCase();
+    return !termino || texto.includes(termino) || nombre.includes(termino) || categoria.includes(termino);
+  });
+
+  if (!filtrados.some(p => p.id === productoSeleccionado.value)) {
+    productoSeleccionado.value = "";
+  }
+
+  renderResultadosProducto(filtrados.slice(0, 8));
 }
 
 window.agregarAlCarrito = () => {
-  const id = select.value;
+  const id = productoSeleccionado.value;
   const cantidad = Number(document.getElementById("cantidad").value);
   const producto = productos.find(p => p.id === id);
 
-  if (!producto) return;
+  if (!producto) {
+    alert("Selecciona un producto del buscador.");
+    return;
+  }
 
   if (!cantidad || cantidad <= 0) {
     alert("Ingresa una cantidad valida");
@@ -322,6 +377,9 @@ window.vaciarCarrito = () => {
     renderCarrito();
   }
 };
+
+productoBusqueda.addEventListener("input", filtrarProductosCEO);
+productoBusqueda.addEventListener("focus", filtrarProductosCEO);
 
 cargarProductos();
 renderCarrito();
