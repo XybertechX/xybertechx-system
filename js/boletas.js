@@ -264,11 +264,11 @@ window.generarPDF = async () => {
   logo.src = "img/logo 2.0.png";
 
   logo.onload = () => {
-    const left = 13;
-    const sideWidth = 48;
-    const contentX = 69;
-    const contentW = 127;
-    let y = 20;
+    const left = 14;
+    const sideWidth = 0;
+    const contentX = 18;
+    const contentW = 174;
+    let y = 62;
 
     const navy = [3, 7, 18];
     const navySoft = [15, 23, 42];
@@ -290,76 +290,46 @@ window.generarPDF = async () => {
       fill([8, 13, 31]);
       doc.roundedRect(5, 6, 200, 282, 10, 10, "F");
       fill([30, 64, 175]);
-      doc.roundedRect(151, 8, 48, 34, 8, 8, "F");
+      doc.roundedRect(132, 8, 67, 38, 8, 8, "F");
       fill([88, 28, 135]);
-      doc.roundedRect(139, 252, 58, 27, 8, 8, "F");
+      doc.roundedRect(12, 246, 62, 30, 8, 8, "F");
       fill([10, 18, 40]);
-      doc.roundedRect(63, 12, 139, 270, 8, 8, "F");
+      doc.roundedRect(12, 13, 186, 268, 8, 8, "F");
       if (!withSidebar) return;
 
-      fill([12, 18, 38]);
-      doc.roundedRect(left, 12, sideWidth, 270, 8, 8, "F");
       fill(purple);
-      doc.rect(left + sideWidth - 2, 12, 2, 270, "F");
+      doc.rect(12, 52, 186, 2, "F");
     };
 
     const sidebar = () => {
-      doc.addImage(logo, "PNG", 24, 22, 26, 26);
+      doc.addImage(logo, "PNG", 22, 21, 24, 24);
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(10);
+      doc.setFontSize(17);
       doc.setTextColor(255, 255, 255);
-      doc.text("XYBERTECHX", 37, 58, { align: "center" });
-      doc.setFontSize(7);
+      doc.text("XYBERTECHX", 52, 29);
+      doc.setFontSize(9);
       doc.setTextColor(147, 197, 253);
-      doc.text("TECHNOLOGY", 37, 64, { align: "center" });
+      doc.text("Technology | Servicios tecnicos y ventas", 52, 38);
 
-      fill(navySoft);
-      doc.roundedRect(20, 77, 34, 33, 4, 4, "F");
+      fill([124, 58, 237]);
+      doc.roundedRect(142, 20, 46, 22, 5, 5, "F");
       doc.setFont("helvetica", "bold");
       doc.setFontSize(7);
       doc.setTextColor(125, 211, 252);
-      doc.text("TOTAL", 25, 87);
+      doc.text("TOTAL PROPUESTO", 151, 28);
       doc.setTextColor(255, 255, 255);
-      doc.setFontSize(12);
-      doc.text(`S/${dinero(totalFinal)}`, 25, 99);
-
-      doc.setFontSize(7);
-      doc.setTextColor(148, 163, 184);
-      doc.text("CONTACTO", 23, 126);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(226, 232, 240);
-      doc.text("973 518 710", 23, 135);
-      doc.text("xybertechxtechnology", 23, 143);
-      doc.text("@gmail.com", 23, 151);
-
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(148, 163, 184);
-      doc.text("PAGO", 23, 171);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(226, 232, 240);
-      doc.text("BBVA soles", 23, 180);
-      doc.text(datosPago.bbva, 23, 187);
-      doc.text("CCI", 23, 199);
-      doc.text(datosPago.cci, 23, 206);
-      doc.text("Yape / Plin", 23, 218);
-      doc.text("973 518 710", 23, 225);
-
-      fill([30, 64, 175]);
-      doc.roundedRect(20, 246, 34, 18, 4, 4, "F");
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(255, 255, 255);
-      doc.text("Confirmar", 37, 254, { align: "center" });
-      doc.text("con comprobante", 37, 260, { align: "center" });
+      doc.setFontSize(13);
+      doc.text(`S/${dinero(totalFinal)}`, 151, 37);
     };
 
     const footer = () => {
       fill(navy);
-      doc.rect(63, 284, 139, 9, "F");
+      doc.rect(12, 284, 186, 9, "F");
       doc.setFont("helvetica", "normal");
       doc.setFontSize(7);
       doc.setTextColor(226, 232, 240);
-      doc.text("Gracias por confiar en XyberTechX Technology.", 70, 290);
-      doc.text("Documento generado para atencion coordinada.", 196, 290, { align: "right" });
+      doc.text("973 518 710 | xybertechxtechnology@gmail.com", 18, 290);
+      doc.text("Gracias por confiar en XyberTechX Technology.", 192, 290, { align: "right" });
     };
 
     const newPageIfNeeded = (height) => {
@@ -367,7 +337,7 @@ window.generarPDF = async () => {
       footer();
       doc.addPage();
       pageBase();
-      y = 22;
+      y = 24;
     };
 
     const label = (title, value, x, yy, max = 30) => {
@@ -386,58 +356,58 @@ window.generarPDF = async () => {
 
     color(ink);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(20);
+    doc.setFontSize(18);
     doc.text(registro.numero, contentX, y);
     doc.setFontSize(10);
     doc.setTextColor(125, 211, 252);
     doc.text("Boleta simple | Cotizacion de servicio o producto externo", contentX, y + 8);
 
     fill(cyan);
-    doc.roundedRect(157, 20, 38, 22, 4, 4, "F");
+    doc.roundedRect(152, 61, 40, 21, 4, 4, "F");
     doc.setFont("helvetica", "bold");
     doc.setFontSize(7);
     doc.setTextColor(255, 255, 255);
-    doc.text("FECHA", 164, 29);
+    doc.text("FECHA", 161, 69);
     doc.setFontSize(9);
-    doc.text(fecha, 164, 37);
+    doc.text(fecha, 161, 77);
 
-    y = 55;
+    y = 84;
     fill([23, 37, 84]);
     draw([59, 130, 246]);
-    doc.roundedRect(contentX, y, contentW, 24, 5, 5, "FD");
-    label("Cliente", cliente, 76, y + 10, 28);
-    label("Telefono", telefono, 126, y + 10, 18);
-    label("Validez", `${validez} dias`, 168, y + 10, 12);
+    doc.roundedRect(contentX, y, contentW, 22, 5, 5, "FD");
+    label("Cliente", cliente, 26, y + 9, 34);
+    label("Telefono", telefono, 92, y + 9, 24);
+    label("Validez", `${validez} dias`, 154, y + 9, 18);
 
-    y += 35;
+    y += 30;
     fill([16, 24, 54]);
     draw(line);
-    doc.roundedRect(contentX, y, contentW, 31, 5, 5, "FD");
-    label("Tipo de atencion", tipoCotizacion, 76, y + 10, 30);
-    label("Responsable", asesor, 76, y + 23, 30);
+    doc.roundedRect(contentX, y, contentW, 28, 5, 5, "FD");
+    label("Tipo de atencion", tipoCotizacion, 26, y + 9, 36);
+    label("Responsable", asesor, 26, y + 21, 36);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(7);
     doc.setTextColor(147, 197, 253);
-    doc.text("ALCANCE", 145, y + 10);
+    doc.text("ALCANCE", 112, y + 9);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
     color(ink);
-    doc.text(doc.splitTextToSize("Servicio sujeto a revision, disponibilidad y coordinacion con el cliente.", 42), 145, y + 17);
+    doc.text(doc.splitTextToSize("Servicio sujeto a revision, disponibilidad y coordinacion con el cliente.", 66), 112, y + 16);
 
-    y += 45;
+    y += 39;
     fill(navy);
     doc.roundedRect(contentX, y, contentW, 11, 3, 3, "F");
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8);
     doc.setTextColor(255, 255, 255);
-    doc.text("Detalle", 75, y + 7);
-    doc.text("Cant.", 145, y + 7, { align: "center" });
-    doc.text("Unit.", 166, y + 7, { align: "right" });
-    doc.text("Importe", 191, y + 7, { align: "right" });
+    doc.text("Detalle", 26, y + 7);
+    doc.text("Cant.", 126, y + 7, { align: "center" });
+    doc.text("Unit.", 158, y + 7, { align: "right" });
+    doc.text("Importe", 188, y + 7, { align: "right" });
     y += 15;
 
     items.forEach((item, index) => {
-      const lineas = doc.splitTextToSize(item.descripcion, 63);
+      const lineas = doc.splitTextToSize(item.descripcion, 94);
       const rowHeight = Math.max(11, lineas.length * 5 + 4);
       newPageIfNeeded(rowHeight + 3);
       fill(index % 2 === 0 ? [15, 23, 42] : [25, 36, 78]);
@@ -445,44 +415,44 @@ window.generarPDF = async () => {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(8.3);
       color(ink);
-      doc.text(lineas, 75, y);
-      doc.text(String(item.cantidad), 145, y, { align: "center" });
-      doc.text(`S/${dinero(item.precio)}`, 166, y, { align: "right" });
-      doc.text(`S/${dinero(item.total)}`, 191, y, { align: "right" });
+      doc.text(lineas, 26, y);
+      doc.text(String(item.cantidad), 126, y, { align: "center" });
+      doc.text(`S/${dinero(item.precio)}`, 158, y, { align: "right" });
+      doc.text(`S/${dinero(item.total)}`, 188, y, { align: "right" });
       y += rowHeight + 1;
     });
 
     y += 8;
-    newPageIfNeeded(53);
+    newPageIfNeeded(46);
     fill([30, 41, 89]);
     draw([96, 165, 250]);
-    doc.roundedRect(contentX, y, 62, 43, 5, 5, "FD");
+    doc.roundedRect(contentX, y, 92, 36, 5, 5, "FD");
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9);
     doc.setTextColor(125, 211, 252);
-    doc.text("Indicaciones", 76, y + 10);
+    doc.text("Pago e indicaciones", 26, y + 10);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.8);
     color(ink);
-    doc.text(doc.splitTextToSize("Enviar comprobante de pago para reservar atencion, entrega o compra de repuesto.", 50), 76, y + 19);
+    doc.text(doc.splitTextToSize(`BBVA: ${datosPago.bbva} | CCI: ${datosPago.cci} | ${datosPago.billeteras}. Enviar comprobante para confirmar.`, 78), 26, y + 18);
 
     fill([17, 24, 50]);
     draw(line);
-    doc.roundedRect(137, y, 59, 43, 5, 5, "FD");
+    doc.roundedRect(116, y, 76, 36, 5, 5, "FD");
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.3);
     color(ink);
-    doc.text("Subtotal", 144, y + 11);
-    doc.text(`S/${dinero(subtotal)}`, 190, y + 11, { align: "right" });
-    doc.text("Descuento", 144, y + 20);
-    doc.text(`S/${dinero(descuento)}`, 190, y + 20, { align: "right" });
+    doc.text("Subtotal", 124, y + 11);
+    doc.text(`S/${dinero(subtotal)}`, 185, y + 11, { align: "right" });
+    doc.text("Descuento", 124, y + 20);
+    doc.text(`S/${dinero(descuento)}`, 185, y + 20, { align: "right" });
     fill([124, 58, 237]);
-    doc.roundedRect(143, y + 27, 47, 11, 3, 3, "F");
+    doc.roundedRect(123, y + 24, 62, 10, 3, 3, "F");
     doc.setFont("helvetica", "bold");
     doc.setTextColor(255, 255, 255);
-    doc.text(`TOTAL S/${dinero(totalFinal)}`, 166.5, y + 34.5, { align: "center" });
+    doc.text(`TOTAL S/${dinero(totalFinal)}`, 154, y + 31, { align: "center" });
 
-    y += 57;
+    y += 45;
     newPageIfNeeded(notas ? 62 : 43);
     fill([16, 24, 54]);
     draw(line);
@@ -490,13 +460,13 @@ window.generarPDF = async () => {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9);
     color(ink);
-    doc.text("Condiciones de atencion", 76, y + 10);
+    doc.text("Condiciones de atencion", 26, y + 10);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.7);
     doc.setTextColor(203, 213, 225);
-    doc.text(`Documento valido por ${validez} dias desde su emision.`, 76, y + 18);
-    doc.text("Precios sujetos a disponibilidad de productos, repuestos o proveedor.", 76, y + 25);
-    doc.text("El servicio se agenda despues de confirmar pago o adelanto coordinado.", 76, y + 32);
+    doc.text(`Documento valido por ${validez} dias desde su emision.`, 26, y + 18);
+    doc.text("Precios sujetos a disponibilidad de productos, repuestos o proveedor.", 26, y + 25);
+    doc.text("El servicio se agenda despues de confirmar pago o adelanto coordinado.", 26, y + 32);
 
     if (notas) {
       y += 50;
@@ -507,11 +477,11 @@ window.generarPDF = async () => {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(9);
       color(ink);
-      doc.text("Notas adicionales", 76, y + 9);
+      doc.text("Notas adicionales", 26, y + 9);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(7.8);
       doc.setTextColor(203, 213, 225);
-      doc.text(doc.splitTextToSize(notas, 112), 76, y + 17);
+      doc.text(doc.splitTextToSize(notas, 156), 26, y + 17);
     }
 
     footer();
