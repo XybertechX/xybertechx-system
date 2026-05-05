@@ -166,14 +166,15 @@ window.generarPDF = async () => {
     const contentW = 127;
     let y = 20;
 
-    const navy = [5, 10, 24];
+    const navy = [3, 7, 18];
     const navySoft = [15, 23, 42];
     const blue = [37, 99, 235];
     const cyan = [14, 165, 233];
-    const paper = [235, 244, 255];
-    const panel = [248, 251, 255];
-    const line = [178, 206, 245];
-    const ink = [15, 23, 42];
+    const purple = [126, 34, 206];
+    const paper = [3, 7, 18];
+    const panel = [18, 27, 58];
+    const line = [79, 70, 229];
+    const ink = [248, 250, 252];
 
     const fill = (color) => doc.setFillColor(color[0], color[1], color[2]);
     const draw = (color) => doc.setDrawColor(color[0], color[1], color[2]);
@@ -182,13 +183,19 @@ window.generarPDF = async () => {
     const pageBase = (withSidebar = false) => {
       fill(paper);
       doc.rect(0, 0, 210, 297, "F");
-      fill([246, 250, 255]);
+      fill([8, 13, 31]);
+      doc.roundedRect(5, 6, 200, 282, 10, 10, "F");
+      fill([30, 64, 175]);
+      doc.roundedRect(151, 8, 48, 34, 8, 8, "F");
+      fill([88, 28, 135]);
+      doc.roundedRect(139, 252, 58, 27, 8, 8, "F");
+      fill([10, 18, 40]);
       doc.roundedRect(63, 12, 139, 270, 8, 8, "F");
       if (!withSidebar) return;
 
-      fill(navy);
+      fill([12, 18, 38]);
       doc.roundedRect(left, 12, sideWidth, 270, 8, 8, "F");
-      fill(blue);
+      fill(purple);
       doc.rect(left + sideWidth - 2, 12, 2, 270, "F");
     };
 
@@ -262,7 +269,7 @@ window.generarPDF = async () => {
     const label = (title, value, x, yy, max = 30) => {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(7);
-      doc.setTextColor(71, 85, 105);
+      doc.setTextColor(147, 197, 253);
       doc.text(title.toUpperCase(), x, yy);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(8.5);
@@ -278,7 +285,7 @@ window.generarPDF = async () => {
     doc.setFontSize(20);
     doc.text("Boleta simple", contentX, y);
     doc.setFontSize(10);
-    doc.setTextColor(37, 99, 235);
+    doc.setTextColor(125, 211, 252);
     doc.text("Cotizacion de servicio o producto externo", contentX, y + 8);
 
     fill(cyan);
@@ -291,22 +298,22 @@ window.generarPDF = async () => {
     doc.text(fecha, 164, 37);
 
     y = 55;
-    fill([219, 234, 254]);
-    draw(line);
+    fill([23, 37, 84]);
+    draw([59, 130, 246]);
     doc.roundedRect(contentX, y, contentW, 24, 5, 5, "FD");
     label("Cliente", cliente, 76, y + 10, 28);
     label("Telefono", telefono, 126, y + 10, 18);
     label("Validez", `${validez} dias`, 168, y + 10, 12);
 
     y += 35;
-    fill(panel);
+    fill([16, 24, 54]);
     draw(line);
     doc.roundedRect(contentX, y, contentW, 31, 5, 5, "FD");
     label("Tipo de atencion", tipoCotizacion, 76, y + 10, 30);
     label("Responsable", asesor, 76, y + 23, 30);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(7);
-    doc.setTextColor(71, 85, 105);
+    doc.setTextColor(147, 197, 253);
     doc.text("ALCANCE", 145, y + 10);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
@@ -329,7 +336,7 @@ window.generarPDF = async () => {
       const lineas = doc.splitTextToSize(item.descripcion, 63);
       const rowHeight = Math.max(11, lineas.length * 5 + 4);
       newPageIfNeeded(rowHeight + 3);
-      fill(index % 2 === 0 ? [255, 255, 255] : [236, 245, 255]);
+      fill(index % 2 === 0 ? [15, 23, 42] : [25, 36, 78]);
       doc.roundedRect(contentX, y - 5, contentW, rowHeight, 2, 2, "F");
       doc.setFont("helvetica", "normal");
       doc.setFontSize(8.3);
@@ -343,19 +350,19 @@ window.generarPDF = async () => {
 
     y += 8;
     newPageIfNeeded(53);
-    fill([219, 234, 254]);
-    draw(line);
+    fill([30, 41, 89]);
+    draw([96, 165, 250]);
     doc.roundedRect(contentX, y, 62, 43, 5, 5, "FD");
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9);
-    doc.setTextColor(30, 64, 175);
+    doc.setTextColor(125, 211, 252);
     doc.text("Indicaciones", 76, y + 10);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.8);
     color(ink);
     doc.text(doc.splitTextToSize("Enviar comprobante de pago para reservar atencion, entrega o compra de repuesto.", 50), 76, y + 19);
 
-    fill([255, 255, 255]);
+    fill([17, 24, 50]);
     draw(line);
     doc.roundedRect(137, y, 59, 43, 5, 5, "FD");
     doc.setFont("helvetica", "normal");
@@ -365,7 +372,7 @@ window.generarPDF = async () => {
     doc.text(`S/${dinero(subtotal)}`, 190, y + 11, { align: "right" });
     doc.text("Descuento", 144, y + 20);
     doc.text(`S/${dinero(descuento)}`, 190, y + 20, { align: "right" });
-    fill(blue);
+    fill([124, 58, 237]);
     doc.roundedRect(143, y + 27, 47, 11, 3, 3, "F");
     doc.setFont("helvetica", "bold");
     doc.setTextColor(255, 255, 255);
@@ -373,7 +380,7 @@ window.generarPDF = async () => {
 
     y += 57;
     newPageIfNeeded(notas ? 62 : 43);
-    fill(panel);
+    fill([16, 24, 54]);
     draw(line);
     doc.roundedRect(contentX, y, contentW, 38, 5, 5, "FD");
     doc.setFont("helvetica", "bold");
@@ -382,7 +389,7 @@ window.generarPDF = async () => {
     doc.text("Condiciones de atencion", 76, y + 10);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.7);
-    doc.setTextColor(71, 85, 105);
+    doc.setTextColor(203, 213, 225);
     doc.text(`Documento valido por ${validez} dias desde su emision.`, 76, y + 18);
     doc.text("Precios sujetos a disponibilidad de productos, repuestos o proveedor.", 76, y + 25);
     doc.text("El servicio se agenda despues de confirmar pago o adelanto coordinado.", 76, y + 32);
@@ -390,7 +397,7 @@ window.generarPDF = async () => {
     if (notas) {
       y += 50;
       newPageIfNeeded(32);
-      fill([236, 245, 255]);
+      fill([30, 41, 89]);
       draw(line);
       doc.roundedRect(contentX, y, contentW, 28, 5, 5, "FD");
       doc.setFont("helvetica", "bold");
@@ -399,7 +406,7 @@ window.generarPDF = async () => {
       doc.text("Notas adicionales", 76, y + 9);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(7.8);
-      doc.setTextColor(71, 85, 105);
+      doc.setTextColor(203, 213, 225);
       doc.text(doc.splitTextToSize(notas, 112), 76, y + 17);
     }
 
