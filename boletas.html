@@ -130,9 +130,22 @@
           <h3>Detalle de cotizacion</h3>
           <p>Revisa el contenido antes de generar el PDF.</p>
         </div>
-        <button onclick="generarPDF()">Generar PDF</button>
+        <div class="control-actions">
+          <button onclick="generarPDF()">Generar PDF</button>
+          <button type="button" id="btnWhatsappBoleta">WhatsApp</button>
+        </div>
       </div>
       <ul id="listaItems" class="compact-list"></ul>
+    </section>
+
+    <section class="card control-panel">
+      <div class="panel-heading">
+        <div>
+          <h3>Historial de boletas</h3>
+          <p>Ultimos documentos generados para reubicar servicios y propuestas.</p>
+        </div>
+      </div>
+      <ul id="historialBoletas" class="compact-list"></ul>
     </section>
 
   </main>
@@ -142,7 +155,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script type="module" src="js/auth.js"></script>
 <script type="module" src="js/logout.js"></script>
-<script src="js/boletas.js"></script>
+<script type="module" src="js/boletas.js"></script>
 
 </body>
 </html>

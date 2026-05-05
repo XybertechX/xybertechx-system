@@ -1,12 +1,18 @@
-import { db } from "./firebase.js";
+import { db, storage } from "./firebase.js";
 import {
   collection,
   addDoc,
   getDocs,
   deleteDoc,
   doc,
+  serverTimestamp,
   updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  getDownloadURL,
+  ref,
+  uploadBytes
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const lista = document.getElementById("lista");
 const buscarInventario = document.getElementById("buscarInventario");
@@ -15,8 +21,14 @@ const totalProductos = document.getElementById("totalProductos");
 const productosDisponibles = document.getElementById("productosDisponibles");
 const productosBajoStock = document.getElementById("productosBajoStock");
 const productosAgotados = document.getElementById("productosAgotados");
+const modalProducto = document.getElementById("modalProducto");
+const cerrarModalProducto = document.getElementById("cerrarModalProducto");
+const guardarProductoEditado = document.getElementById("guardarProductoEditado");
+const editPreview = document.getElementById("editPreview");
+const editPreviewEstado = document.getElementById("editPreviewEstado");
 
 let productos = [];
+let productoEditando = null;
 
 function dinero(valor) {
   return `S/${Number(valor || 0).toFixed(2)}`;
@@ -29,9 +41,11 @@ function estadoProducto(stock) {
 }
 
 function limpiarFormulario() {
-  ["nombre", "categoria", "costo", "precio", "stock", "imagen"].forEach((id) => {
+  ["nombre", "categoria", "costo", "precio", "stock", "imagen", "imagenArchivo"].forEach((id) => {
     document.getElementById(id).value = "";
   });
+  document.getElementById("visibleWeb").checked = true;
+  document.getElementById("destacado").checked = false;
 }
 
 function obtenerImagen(producto) {
@@ -71,6 +85,16 @@ function crearMiniatura(producto, imagen) {
   return thumb;
 }
 
+async function subirImagenProducto(archivo, productoId) {
+  if (!archivo) return "";
+
+  const extension = archivo.name.split(".").pop() || "jpg";
+  const ruta = `inventario/${productoId}-${Date.now()}.${extension}`;
+  const storageRef = ref(storage, ruta);
+  await uploadBytes(storageRef, archivo);
+  return getDownloadURL(storageRef);
+}
+
 function actualizarResumen() {
   const bajo = productos.filter((p) => Number(p.stock || 0) > 0 && Number(p.stock || 0) <= 5);
   const agotados = productos.filter((p) => Number(p.stock || 0) <= 0);
@@ -107,74 +131,117 @@ window.agregarProducto = async () => {
   const precio = Number(document.getElementById("precio").value);
   const stock = Number(document.getElementById("stock").value);
   const imagen = document.getElementById("imagen").value.trim();
+  const archivoImagen = document.getElementById("imagenArchivo").files[0];
+  const visibleWeb = document.getElementById("visibleWeb").checked;
+  const destacado = document.getElementById("destacado").checked;
 
-  if (!nombre || !categoria || !imagen || costo < 0 || precio <= 0 || stock < 0) {
+  if (!nombre || !categoria || (!imagen && !archivoImagen) || costo < 0 || precio <= 0 || stock < 0) {
     alert("Completa producto, categoria, imagen, precio y stock con valores validos.");
     return;
   }
 
-  await addDoc(collection(db, "inventario"), {
+  const productoRef = await addDoc(collection(db, "inventario"), {
     nombre,
     categoria,
     costo,
     precio,
     stock,
     imagen,
-    imagenUrl: imagen
+    imagenUrl: imagen,
+    visibleWeb,
+    destacado,
+    creadoEn: serverTimestamp(),
+    actualizadoEn: serverTimestamp()
   });
+
+  if (archivoImagen) {
+    const imagenSubida = await subirImagenProducto(archivoImagen, productoRef.id);
+    await updateDoc(doc(db, "inventario", productoRef.id), {
+      imagen: imagenSubida,
+      imagenUrl: imagenSubida,
+      actualizadoEn: serverTimestamp()
+    });
+  }
 
   limpiarFormulario();
   await cargarProductos();
 };
 
 async function editarProducto(producto) {
-  const nuevoNombre = prompt("Nombre del producto:", producto.nombre || "");
-  if (nuevoNombre === null) return;
+  productoEditando = producto;
+  document.getElementById("editNombre").value = producto.nombre || "";
+  document.getElementById("editCategoria").value = producto.categoria || "";
+  document.getElementById("editCosto").value = producto.costo ?? 0;
+  document.getElementById("editPrecio").value = producto.precio ?? 0;
+  document.getElementById("editStock").value = producto.stock ?? 0;
+  document.getElementById("editImagen").value = obtenerImagen(producto);
+  document.getElementById("editImagenArchivo").value = "";
+  document.getElementById("editVisibleWeb").checked = producto.visibleWeb !== false;
+  document.getElementById("editDestacado").checked = Boolean(producto.destacado);
+  editPreview.src = obtenerImagen(producto) || "img/logo 2.0.png";
+  editPreviewEstado.textContent = obtenerImagen(producto) ? "Imagen actual" : "Sin imagen cargada";
+  modalProducto.classList.remove("hidden");
+}
 
-  const nuevaCategoria = prompt("Categoria:", producto.categoria || "");
-  if (nuevaCategoria === null) return;
+async function guardarEdicionProducto() {
+  if (!productoEditando) return;
 
-  const nuevoCosto = prompt("Costo:", producto.costo ?? 0);
-  if (nuevoCosto === null) return;
-
-  const nuevoPrecio = prompt("Precio venta:", producto.precio ?? 0);
-  if (nuevoPrecio === null) return;
-
-  const nuevoStock = prompt("Stock:", producto.stock ?? 0);
-  if (nuevoStock === null) return;
-
-  const nuevaImagen = prompt("URL de imagen para web/POS:", obtenerImagen(producto));
-  if (nuevaImagen === null) return;
-
-  const nombreActualizado = nuevoNombre.trim();
-  const categoriaActualizada = nuevaCategoria.trim();
-  const costoActualizado = Number(nuevoCosto);
-  const precioActualizado = Number(nuevoPrecio);
-  const stockActualizado = Number(nuevoStock);
-  const imagenActualizada = nuevaImagen.trim();
+  const nombreActualizado = document.getElementById("editNombre").value.trim();
+  const categoriaActualizada = document.getElementById("editCategoria").value.trim();
+  const costoActualizado = Number(document.getElementById("editCosto").value);
+  const precioActualizado = Number(document.getElementById("editPrecio").value);
+  const stockActualizado = Number(document.getElementById("editStock").value);
+  let imagenActualizada = document.getElementById("editImagen").value.trim();
+  const archivoImagen = document.getElementById("editImagenArchivo").files[0];
+  const visibleWeb = document.getElementById("editVisibleWeb").checked;
+  const destacado = document.getElementById("editDestacado").checked;
 
   if (
     !nombreActualizado ||
     !categoriaActualizada ||
-    !imagenActualizada ||
+    (!imagenActualizada && !archivoImagen) ||
     costoActualizado < 0 ||
     precioActualizado <= 0 ||
     stockActualizado < 0
   ) {
     alert("Nombre, categoria, imagen, precio y stock deben ser valores validos.");
+    guardarProductoEditado.disabled = false;
+    guardarProductoEditado.textContent = "Guardar cambios";
     return;
   }
 
-  await updateDoc(doc(db, "inventario", producto.id), {
-    nombre: nombreActualizado,
-    categoria: categoriaActualizada,
-    costo: costoActualizado,
-    precio: precioActualizado,
-    stock: stockActualizado,
-    imagen: imagenActualizada,
-    imagenUrl: imagenActualizada
-  });
+  try {
+    guardarProductoEditado.disabled = true;
+    guardarProductoEditado.textContent = archivoImagen ? "Subiendo imagen..." : "Guardando...";
 
+    if (archivoImagen) {
+      imagenActualizada = await subirImagenProducto(archivoImagen, productoEditando.id);
+    }
+
+    await updateDoc(doc(db, "inventario", productoEditando.id), {
+      nombre: nombreActualizado,
+      categoria: categoriaActualizada,
+      costo: costoActualizado,
+      precio: precioActualizado,
+      stock: stockActualizado,
+      imagen: imagenActualizada,
+      imagenUrl: imagenActualizada,
+      visibleWeb,
+      destacado,
+      actualizadoEn: serverTimestamp()
+    });
+  } catch (error) {
+    console.error("Error editando producto:", error);
+    alert(error.message || "No se pudo guardar el producto.");
+    guardarProductoEditado.disabled = false;
+    guardarProductoEditado.textContent = "Guardar cambios";
+    return;
+  }
+
+  guardarProductoEditado.disabled = false;
+  guardarProductoEditado.textContent = "Guardar cambios";
+  modalProducto.classList.add("hidden");
+  productoEditando = null;
   await cargarProductos();
 }
 
@@ -216,7 +283,7 @@ function renderProductos() {
     const nombre = document.createElement("strong");
     nombre.textContent = producto.nombre || "Producto sin nombre";
     const categoria = document.createElement("small");
-    categoria.textContent = producto.categoria || "Sin categoria";
+    categoria.textContent = `${producto.categoria || "Sin categoria"}${producto.visibleWeb === false ? " | Oculto web" : ""}${producto.destacado ? " | Destacado" : ""}`;
     info.append(nombre, categoria);
     productoVista.append(thumb, info);
 
@@ -270,5 +337,17 @@ async function cargarProductos() {
 
 buscarInventario.addEventListener("input", renderProductos);
 filtroInventario.addEventListener("change", renderProductos);
+cerrarModalProducto.addEventListener("click", () => modalProducto.classList.add("hidden"));
+guardarProductoEditado.addEventListener("click", guardarEdicionProducto);
+document.getElementById("editImagen").addEventListener("input", (event) => {
+  editPreview.src = event.target.value || "img/logo 2.0.png";
+  editPreviewEstado.textContent = event.target.value ? "Vista por URL" : "Sin imagen cargada";
+});
+document.getElementById("editImagenArchivo").addEventListener("change", (event) => {
+  const archivo = event.target.files[0];
+  if (!archivo) return;
+  editPreview.src = URL.createObjectURL(archivo);
+  editPreviewEstado.textContent = "Nueva imagen seleccionada";
+});
 
 cargarProductos();

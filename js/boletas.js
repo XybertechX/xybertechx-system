@@ -1,8 +1,24 @@
+import { db } from "./firebase.js";
+import {
+  collection,
+  doc,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  runTransaction,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
 let items = [];
 
 const listaItems = document.getElementById("listaItems");
 const subtotalSpan = document.getElementById("subtotal");
 const totalFinalSpan = document.getElementById("totalFinal");
+const historialBoletas = document.getElementById("historialBoletas");
+const btnWhatsappBoleta = document.getElementById("btnWhatsappBoleta");
+
+let ultimaBoleta = null;
 
 const plantillas = {
   diagnostico: {
@@ -135,6 +151,80 @@ function textoCorto(texto, maximo) {
   return limpio.length > maximo ? `${limpio.slice(0, maximo - 3)}...` : limpio;
 }
 
+function numeroBoleta(numero) {
+  return `BOL-${new Date().getFullYear()}-${String(numero).padStart(4, "0")}`;
+}
+
+function telefonoWhatsapp(telefono) {
+  const digitos = String(telefono || "").replace(/\D/g, "");
+  if (!digitos) return "";
+  return digitos.startsWith("51") ? digitos : `51${digitos}`;
+}
+
+async function registrarBoleta(datos) {
+  const contadorRef = doc(db, "configuracion", "correlativos");
+  const boletaRef = doc(collection(db, "boletas"));
+
+  return runTransaction(db, async (transaction) => {
+    const contadorSnap = await transaction.get(contadorRef);
+    const ultimo = contadorSnap.exists() ? Number(contadorSnap.data().boletas || 0) : 0;
+    const siguiente = ultimo + 1;
+    const numero = numeroBoleta(siguiente);
+
+    transaction.set(contadorRef, { boletas: siguiente }, { merge: true });
+    transaction.set(boletaRef, {
+      ...datos,
+      numero,
+      correlativo: siguiente,
+      estado: "emitida",
+      fechaCreacion: serverTimestamp()
+    });
+
+    return { id: boletaRef.id, numero };
+  });
+}
+
+function agregarHistorialBoleta(boleta) {
+  const li = document.createElement("li");
+
+  const detalle = document.createElement("div");
+  const numero = document.createElement("strong");
+  numero.textContent = boleta.numero || "Boleta";
+  const cliente = document.createElement("small");
+  cliente.textContent = `${boleta.cliente || "Cliente"} | ${boleta.tipoCotizacion || "Cotizacion"}`;
+  detalle.append(numero, cliente);
+
+  const valor = document.createElement("div");
+  valor.className = "list-value";
+  const total = document.createElement("span");
+  total.textContent = `S/${dinero(boleta.totalFinal)}`;
+  const estado = document.createElement("small");
+  estado.className = "status-pill";
+  estado.textContent = boleta.estado || "emitida";
+  valor.append(total, estado);
+
+  li.append(detalle, valor);
+  historialBoletas.appendChild(li);
+}
+
+async function cargarHistorialBoletas() {
+  if (!historialBoletas) return;
+  historialBoletas.innerHTML = "";
+
+  const consulta = query(collection(db, "boletas"), orderBy("fechaCreacion", "desc"), limit(8));
+  const snap = await getDocs(consulta);
+
+  if (snap.empty) {
+    const li = document.createElement("li");
+    li.className = "empty-list";
+    li.textContent = "Aun no hay boletas generadas.";
+    historialBoletas.appendChild(li);
+    return;
+  }
+
+  snap.forEach((documento) => agregarHistorialBoleta({ id: documento.id, ...documento.data() }));
+}
+
 window.generarPDF = async () => {
   const cliente = document.getElementById("cliente").value.trim() || "Cliente";
   const telefono = document.getElementById("telefono").value.trim() || "-";
@@ -155,6 +245,20 @@ window.generarPDF = async () => {
   const subtotal = items.reduce((sum, item) => sum + item.total, 0);
   const descuento = Number(document.getElementById("descuento").value) || 0;
   const totalFinal = Math.max(subtotal - descuento, 0);
+  const registro = await registrarBoleta({
+    cliente,
+    telefono,
+    fecha,
+    tipoCotizacion,
+    validez,
+    asesor,
+    notas,
+    items,
+    subtotal,
+    descuento,
+    totalFinal
+  });
+  ultimaBoleta = { ...registro, cliente, telefono, totalFinal, tipoCotizacion };
 
   const logo = new Image();
   logo.src = "img/logo 2.0.png";
@@ -283,10 +387,10 @@ window.generarPDF = async () => {
     color(ink);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(20);
-    doc.text("Boleta simple", contentX, y);
+    doc.text(registro.numero, contentX, y);
     doc.setFontSize(10);
     doc.setTextColor(125, 211, 252);
-    doc.text("Cotizacion de servicio o producto externo", contentX, y + 8);
+    doc.text("Boleta simple | Cotizacion de servicio o producto externo", contentX, y + 8);
 
     fill(cyan);
     doc.roundedRect(157, 20, 38, 22, 4, 4, "F");
@@ -412,7 +516,8 @@ window.generarPDF = async () => {
 
     footer();
 
-    doc.save(`Cotizacion-${limpiarNombreArchivo(cliente)}.pdf`);
+    doc.save(`${registro.numero}-${limpiarNombreArchivo(cliente)}.pdf`);
+    cargarHistorialBoletas();
   };
 
   logo.onerror = () => {
@@ -420,4 +525,19 @@ window.generarPDF = async () => {
   };
 };
 
+btnWhatsappBoleta.addEventListener("click", () => {
+  if (!ultimaBoleta) {
+    alert("Primero genera una boleta para preparar el mensaje.");
+    return;
+  }
+
+  const telefono = telefonoWhatsapp(ultimaBoleta.telefono);
+  const texto = encodeURIComponent(
+    `Hola ${ultimaBoleta.cliente}, te comparto la ${ultimaBoleta.numero} de XyberTechX por ${ultimaBoleta.tipoCotizacion}. Total: S/${dinero(ultimaBoleta.totalFinal)}. Puedes pagar por BBVA, Yape o Plin y enviar el comprobante para confirmar.`
+  );
+  const url = telefono ? `https://wa.me/${telefono}?text=${texto}` : `https://wa.me/?text=${texto}`;
+  window.open(url, "_blank");
+});
+
 renderItems();
+cargarHistorialBoletas();
