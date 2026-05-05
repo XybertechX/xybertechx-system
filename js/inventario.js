@@ -1,4 +1,4 @@
-import { db, storage } from "./firebase.js";
+import { db } from "./firebase.js";
 import {
   collection,
   addDoc,
@@ -8,11 +8,6 @@ import {
   serverTimestamp,
   updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import {
-  getDownloadURL,
-  ref,
-  uploadBytes
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const lista = document.getElementById("lista");
 const buscarInventario = document.getElementById("buscarInventario");
@@ -41,7 +36,7 @@ function estadoProducto(stock) {
 }
 
 function limpiarFormulario() {
-  ["nombre", "categoria", "costo", "precio", "stock", "imagen", "imagenArchivo"].forEach((id) => {
+  ["nombre", "categoria", "costo", "precio", "stock", "imagen"].forEach((id) => {
     document.getElementById(id).value = "";
   });
   document.getElementById("visibleWeb").checked = true;
@@ -85,16 +80,6 @@ function crearMiniatura(producto, imagen) {
   return thumb;
 }
 
-async function subirImagenProducto(archivo, productoId) {
-  if (!archivo) return "";
-
-  const extension = archivo.name.split(".").pop() || "jpg";
-  const ruta = `inventario/${productoId}-${Date.now()}.${extension}`;
-  const storageRef = ref(storage, ruta);
-  await uploadBytes(storageRef, archivo);
-  return getDownloadURL(storageRef);
-}
-
 function actualizarResumen() {
   const bajo = productos.filter((p) => Number(p.stock || 0) > 0 && Number(p.stock || 0) <= 5);
   const agotados = productos.filter((p) => Number(p.stock || 0) <= 0);
@@ -131,16 +116,15 @@ window.agregarProducto = async () => {
   const precio = Number(document.getElementById("precio").value);
   const stock = Number(document.getElementById("stock").value);
   const imagen = document.getElementById("imagen").value.trim();
-  const archivoImagen = document.getElementById("imagenArchivo").files[0];
   const visibleWeb = document.getElementById("visibleWeb").checked;
   const destacado = document.getElementById("destacado").checked;
 
-  if (!nombre || !categoria || (!imagen && !archivoImagen) || costo < 0 || precio <= 0 || stock < 0) {
+  if (!nombre || !categoria || !imagen || costo < 0 || precio <= 0 || stock < 0) {
     alert("Completa producto, categoria, imagen, precio y stock con valores validos.");
     return;
   }
 
-  const productoRef = await addDoc(collection(db, "inventario"), {
+  await addDoc(collection(db, "inventario"), {
     nombre,
     categoria,
     costo,
@@ -154,15 +138,6 @@ window.agregarProducto = async () => {
     actualizadoEn: serverTimestamp()
   });
 
-  if (archivoImagen) {
-    const imagenSubida = await subirImagenProducto(archivoImagen, productoRef.id);
-    await updateDoc(doc(db, "inventario", productoRef.id), {
-      imagen: imagenSubida,
-      imagenUrl: imagenSubida,
-      actualizadoEn: serverTimestamp()
-    });
-  }
-
   limpiarFormulario();
   await cargarProductos();
 };
@@ -175,7 +150,6 @@ async function editarProducto(producto) {
   document.getElementById("editPrecio").value = producto.precio ?? 0;
   document.getElementById("editStock").value = producto.stock ?? 0;
   document.getElementById("editImagen").value = obtenerImagen(producto);
-  document.getElementById("editImagenArchivo").value = "";
   document.getElementById("editVisibleWeb").checked = producto.visibleWeb !== false;
   document.getElementById("editDestacado").checked = Boolean(producto.destacado);
   editPreview.src = obtenerImagen(producto) || "img/logo 2.0.png";
@@ -192,14 +166,13 @@ async function guardarEdicionProducto() {
   const precioActualizado = Number(document.getElementById("editPrecio").value);
   const stockActualizado = Number(document.getElementById("editStock").value);
   let imagenActualizada = document.getElementById("editImagen").value.trim();
-  const archivoImagen = document.getElementById("editImagenArchivo").files[0];
   const visibleWeb = document.getElementById("editVisibleWeb").checked;
   const destacado = document.getElementById("editDestacado").checked;
 
   if (
     !nombreActualizado ||
     !categoriaActualizada ||
-    (!imagenActualizada && !archivoImagen) ||
+    !imagenActualizada ||
     costoActualizado < 0 ||
     precioActualizado <= 0 ||
     stockActualizado < 0
@@ -212,11 +185,7 @@ async function guardarEdicionProducto() {
 
   try {
     guardarProductoEditado.disabled = true;
-    guardarProductoEditado.textContent = archivoImagen ? "Subiendo imagen..." : "Guardando...";
-
-    if (archivoImagen) {
-      imagenActualizada = await subirImagenProducto(archivoImagen, productoEditando.id);
-    }
+    guardarProductoEditado.textContent = "Guardando...";
 
     await updateDoc(doc(db, "inventario", productoEditando.id), {
       nombre: nombreActualizado,
@@ -342,12 +311,6 @@ guardarProductoEditado.addEventListener("click", guardarEdicionProducto);
 document.getElementById("editImagen").addEventListener("input", (event) => {
   editPreview.src = event.target.value || "img/logo 2.0.png";
   editPreviewEstado.textContent = event.target.value ? "Vista por URL" : "Sin imagen cargada";
-});
-document.getElementById("editImagenArchivo").addEventListener("change", (event) => {
-  const archivo = event.target.files[0];
-  if (!archivo) return;
-  editPreview.src = URL.createObjectURL(archivo);
-  editPreviewEstado.textContent = "Nueva imagen seleccionada";
 });
 
 cargarProductos();
