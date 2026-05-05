@@ -160,227 +160,247 @@ window.generarPDF = async () => {
   logo.src = "img/logo 2.0.png";
 
   logo.onload = () => {
-    const margen = 14;
-    const ancho = 182;
-    let y = 18;
+    const left = 13;
+    const sideWidth = 48;
+    const contentX = 69;
+    const contentW = 127;
+    let y = 20;
 
-    const azul = [37, 99, 235];
-    const azulOscuro = [5, 10, 24];
-    const texto = [15, 23, 42];
-    const suave = [241, 247, 255];
-    const borde = [191, 219, 254];
+    const navy = [5, 10, 24];
+    const navySoft = [15, 23, 42];
+    const blue = [37, 99, 235];
+    const cyan = [14, 165, 233];
+    const paper = [235, 244, 255];
+    const panel = [248, 251, 255];
+    const line = [178, 206, 245];
+    const ink = [15, 23, 42];
 
-    const setColor = (color) => doc.setTextColor(color[0], color[1], color[2]);
-    const setFill = (color) => doc.setFillColor(color[0], color[1], color[2]);
-    const setDraw = (color) => doc.setDrawColor(color[0], color[1], color[2]);
+    const fill = (color) => doc.setFillColor(color[0], color[1], color[2]);
+    const draw = (color) => doc.setDrawColor(color[0], color[1], color[2]);
+    const color = (value) => doc.setTextColor(value[0], value[1], value[2]);
 
-    const fondoPagina = () => {
-      setFill([229, 239, 255]);
+    const pageBase = (withSidebar = false) => {
+      fill(paper);
       doc.rect(0, 0, 210, 297, "F");
-      setFill([247, 251, 255]);
-      doc.roundedRect(9, 52, 192, 226, 6, 6, "F");
+      fill([246, 250, 255]);
+      doc.roundedRect(63, 12, 139, 270, 8, 8, "F");
+      if (!withSidebar) return;
+
+      fill(navy);
+      doc.roundedRect(left, 12, sideWidth, 270, 8, 8, "F");
+      fill(blue);
+      doc.rect(left + sideWidth - 2, 12, 2, 270, "F");
+    };
+
+    const sidebar = () => {
+      doc.addImage(logo, "PNG", 24, 22, 26, 26);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(255, 255, 255);
+      doc.text("XYBERTECHX", 37, 58, { align: "center" });
+      doc.setFontSize(7);
+      doc.setTextColor(147, 197, 253);
+      doc.text("TECHNOLOGY", 37, 64, { align: "center" });
+
+      fill(navySoft);
+      doc.roundedRect(20, 77, 34, 33, 4, 4, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7);
+      doc.setTextColor(125, 211, 252);
+      doc.text("TOTAL", 25, 87);
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(12);
+      doc.text(`S/${dinero(totalFinal)}`, 25, 99);
+
+      doc.setFontSize(7);
+      doc.setTextColor(148, 163, 184);
+      doc.text("CONTACTO", 23, 126);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(226, 232, 240);
+      doc.text("973 518 710", 23, 135);
+      doc.text("xybertechxtechnology", 23, 143);
+      doc.text("@gmail.com", 23, 151);
+
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(148, 163, 184);
+      doc.text("PAGO", 23, 171);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(226, 232, 240);
+      doc.text("BBVA soles", 23, 180);
+      doc.text(datosPago.bbva, 23, 187);
+      doc.text("CCI", 23, 199);
+      doc.text(datosPago.cci, 23, 206);
+      doc.text("Yape / Plin", 23, 218);
+      doc.text("973 518 710", 23, 225);
+
+      fill([30, 64, 175]);
+      doc.roundedRect(20, 246, 34, 18, 4, 4, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(255, 255, 255);
+      doc.text("Confirmar", 37, 254, { align: "center" });
+      doc.text("con comprobante", 37, 260, { align: "center" });
     };
 
     const footer = () => {
-      setFill(azulOscuro);
-      doc.rect(0, 286, 210, 11, "F");
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(8);
-      doc.setTextColor(255, 255, 255);
-      doc.text("XyberTechX Technology", margen, 293);
+      fill(navy);
+      doc.rect(63, 284, 139, 9, "F");
       doc.setFont("helvetica", "normal");
-      doc.text("Cel. 973 518 710 | xybertechxtechnology@gmail.com", 88, 293);
+      doc.setFontSize(7);
+      doc.setTextColor(226, 232, 240);
+      doc.text("Gracias por confiar en XyberTechX Technology.", 70, 290);
+      doc.text("Documento generado para atencion coordinada.", 196, 290, { align: "right" });
     };
 
-    const saltarSiHaceFalta = (alto) => {
-      if (y + alto <= 278) return;
+    const newPageIfNeeded = (height) => {
+      if (y + height <= 275) return;
       footer();
       doc.addPage();
-      fondoPagina();
-      y = 18;
+      pageBase();
+      y = 22;
     };
 
-    const etiqueta = (label, value, x, yy, max = 42) => {
+    const label = (title, value, x, yy, max = 30) => {
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(7.5);
-      doc.setTextColor(100, 116, 139);
-      doc.text(label.toUpperCase(), x, yy);
+      doc.setFontSize(7);
+      doc.setTextColor(71, 85, 105);
+      doc.text(title.toUpperCase(), x, yy);
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(9);
-      setColor(texto);
+      doc.setFontSize(8.5);
+      color(ink);
       doc.text(textoCorto(value, max), x, yy + 7);
     };
 
-    fondoPagina();
-    setFill(azulOscuro);
-    doc.rect(0, 0, 210, 48, "F");
-    setFill(azul);
-    doc.rect(0, 46, 210, 3, "F");
-    doc.addImage(logo, "PNG", margen, 8, 26, 26);
+    pageBase(true);
+    sidebar();
 
-    doc.setTextColor(255, 255, 255);
+    color(ink);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text("XYBERTECHX TECHNOLOGY", 46, 18);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8.5);
-    doc.text("Soluciones tecnicas, ventas, mantenimiento y armado de PC", 46, 28);
-    doc.text("Cel: 973 518 710 | xybertechxtechnology@gmail.com", 46, 37);
-
-    setFill([14, 165, 233]);
-    doc.roundedRect(148, 9, 48, 25, 3, 3, "F");
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(7.5);
-    doc.text("DOCUMENTO", 157, 18);
-    doc.setFontSize(10.5);
-    doc.text("BOLETA SIMPLE", 157, 27);
-
-    y = 64;
-    setColor(texto);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text("Cotizacion / Boleta simple", margen, y);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8.5);
-    doc.setTextColor(71, 85, 105);
-    doc.text(`Fecha: ${fecha}`, 196, y, { align: "right" });
-    doc.text("Documento referencial para confirmacion de servicio, producto o entrega.", margen, y + 8);
-
-    y += 17;
-    setFill([219, 234, 254]);
-    setDraw([147, 197, 253]);
-    doc.roundedRect(margen, y, ancho, 18, 5, 5, "FD");
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(8);
-    doc.setTextColor(30, 64, 175);
-    doc.text("TOTAL PROPUESTO", 22, y + 7);
-    doc.setFontSize(12);
-    doc.text(`S/${dinero(totalFinal)}`, 22, y + 15);
-    doc.setFontSize(8);
-    doc.text("VALIDEZ", 93, y + 7);
+    doc.setFontSize(20);
+    doc.text("Boleta simple", contentX, y);
     doc.setFontSize(10);
-    doc.text(`${validez} dias`, 93, y + 15);
-    doc.setFontSize(8);
-    doc.text("ATENCION", 142, y + 7);
-    doc.setFontSize(9);
-    doc.text("Previa coordinacion", 142, y + 15);
+    doc.setTextColor(37, 99, 235);
+    doc.text("Cotizacion de servicio o producto externo", contentX, y + 8);
 
-    y += 29;
-    setFill(suave);
-    setDraw(borde);
-    doc.roundedRect(margen, y, ancho, 34, 4, 4, "FD");
-    etiqueta("Cliente", cliente, 21, y + 11, 34);
-    etiqueta("Telefono", telefono, 21, y + 25, 24);
-    etiqueta("Tipo de atencion", tipoCotizacion, 84, y + 11, 34);
-    etiqueta("Responsable", asesor, 84, y + 25, 34);
+    fill(cyan);
+    doc.roundedRect(157, 20, 38, 22, 4, 4, "F");
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(7.5);
-    doc.setTextColor(100, 116, 139);
-    doc.text("ALCANCE", 150, y + 11);
+    doc.setFontSize(7);
+    doc.setTextColor(255, 255, 255);
+    doc.text("FECHA", 164, 29);
+    doc.setFontSize(9);
+    doc.text(fecha, 164, 37);
+
+    y = 55;
+    fill([219, 234, 254]);
+    draw(line);
+    doc.roundedRect(contentX, y, contentW, 24, 5, 5, "FD");
+    label("Cliente", cliente, 76, y + 10, 28);
+    label("Telefono", telefono, 126, y + 10, 18);
+    label("Validez", `${validez} dias`, 168, y + 10, 12);
+
+    y += 35;
+    fill(panel);
+    draw(line);
+    doc.roundedRect(contentX, y, contentW, 31, 5, 5, "FD");
+    label("Tipo de atencion", tipoCotizacion, 76, y + 10, 30);
+    label("Responsable", asesor, 76, y + 23, 30);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7);
+    doc.setTextColor(71, 85, 105);
+    doc.text("ALCANCE", 145, y + 10);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
-    setColor(texto);
-    doc.text(doc.splitTextToSize("Servicio sujeto a disponibilidad, revision y coordinacion con el cliente.", 38), 150, y + 18);
+    color(ink);
+    doc.text(doc.splitTextToSize("Servicio sujeto a revision, disponibilidad y coordinacion con el cliente.", 42), 145, y + 17);
 
-    y += 47;
-    setFill(azul);
-    doc.roundedRect(margen, y, ancho, 10, 2, 2, "F");
-    doc.setTextColor(255, 255, 255);
+    y += 45;
+    fill(navy);
+    doc.roundedRect(contentX, y, contentW, 11, 3, 3, "F");
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(8.5);
-    doc.text("Detalle", 20, y + 6.5);
-    doc.text("Cant.", 119, y + 6.5);
-    doc.text("Unitario", 145, y + 6.5, { align: "right" });
-    doc.text("Importe", 190, y + 6.5, { align: "right" });
-    y += 13;
+    doc.setFontSize(8);
+    doc.setTextColor(255, 255, 255);
+    doc.text("Detalle", 75, y + 7);
+    doc.text("Cant.", 145, y + 7, { align: "center" });
+    doc.text("Unit.", 166, y + 7, { align: "right" });
+    doc.text("Importe", 191, y + 7, { align: "right" });
+    y += 15;
 
     items.forEach((item, index) => {
-      const lineas = doc.splitTextToSize(item.descripcion, 88);
-      const alto = Math.max(10, lineas.length * 5 + 3);
-      saltarSiHaceFalta(alto + 2);
-
-      if (index % 2 === 0) {
-        setFill([255, 255, 255]);
-        doc.rect(margen, y - 5, ancho, alto, "F");
-      } else {
-        setFill([241, 247, 255]);
-        doc.rect(margen, y - 5, ancho, alto, "F");
-      }
-
-      setColor(texto);
+      const lineas = doc.splitTextToSize(item.descripcion, 63);
+      const rowHeight = Math.max(11, lineas.length * 5 + 4);
+      newPageIfNeeded(rowHeight + 3);
+      fill(index % 2 === 0 ? [255, 255, 255] : [236, 245, 255]);
+      doc.roundedRect(contentX, y - 5, contentW, rowHeight, 2, 2, "F");
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(8.5);
-      doc.text(lineas, 20, y);
-      doc.text(String(item.cantidad), 123, y, { align: "center" });
-      doc.text(`S/${dinero(item.precio)}`, 145, y, { align: "right" });
-      doc.text(`S/${dinero(item.total)}`, 190, y, { align: "right" });
-      y += alto;
+      doc.setFontSize(8.3);
+      color(ink);
+      doc.text(lineas, 75, y);
+      doc.text(String(item.cantidad), 145, y, { align: "center" });
+      doc.text(`S/${dinero(item.precio)}`, 166, y, { align: "right" });
+      doc.text(`S/${dinero(item.total)}`, 191, y, { align: "right" });
+      y += rowHeight + 1;
     });
 
     y += 8;
-    saltarSiHaceFalta(52);
-
-    setFill([219, 234, 254]);
-    setDraw([191, 219, 254]);
-    doc.roundedRect(margen, y, 103, 43, 4, 4, "FD");
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(9.5);
-    doc.setTextColor(30, 64, 175);
-    doc.text("Datos de pago", 20, y + 9);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8.3);
-    setColor(texto);
-    doc.text(`BBVA soles: ${datosPago.bbva}`, 20, y + 18);
-    doc.text(`CCI: ${datosPago.cci}`, 20, y + 26);
-    doc.text(datosPago.billeteras, 20, y + 34);
-    doc.setTextColor(100, 116, 139);
-    doc.text("Enviar comprobante para confirmar.", 20, y + 40);
-
-    setFill([255, 255, 255]);
-    setDraw(borde);
-    doc.roundedRect(124, y, 72, 43, 4, 4, "FD");
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8.7);
-    setColor(texto);
-    doc.text("Subtotal", 132, y + 11);
-    doc.text(`S/${dinero(subtotal)}`, 189, y + 11, { align: "right" });
-    doc.text("Descuento", 132, y + 20);
-    doc.text(`S/${dinero(descuento)}`, 189, y + 20, { align: "right" });
-    setFill([29, 78, 216]);
-    doc.roundedRect(130, y + 27, 60, 11, 3, 3, "F");
-    doc.setTextColor(255, 255, 255);
+    newPageIfNeeded(53);
+    fill([219, 234, 254]);
+    draw(line);
+    doc.roundedRect(contentX, y, 62, 43, 5, 5, "FD");
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9);
-    doc.text(`TOTAL: S/${dinero(totalFinal)}`, 160, y + 34.5, { align: "center" });
+    doc.setTextColor(30, 64, 175);
+    doc.text("Indicaciones", 76, y + 10);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.8);
+    color(ink);
+    doc.text(doc.splitTextToSize("Enviar comprobante de pago para reservar atencion, entrega o compra de repuesto.", 50), 76, y + 19);
+
+    fill([255, 255, 255]);
+    draw(line);
+    doc.roundedRect(137, y, 59, 43, 5, 5, "FD");
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.3);
+    color(ink);
+    doc.text("Subtotal", 144, y + 11);
+    doc.text(`S/${dinero(subtotal)}`, 190, y + 11, { align: "right" });
+    doc.text("Descuento", 144, y + 20);
+    doc.text(`S/${dinero(descuento)}`, 190, y + 20, { align: "right" });
+    fill(blue);
+    doc.roundedRect(143, y + 27, 47, 11, 3, 3, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(255, 255, 255);
+    doc.text(`TOTAL S/${dinero(totalFinal)}`, 166.5, y + 34.5, { align: "center" });
 
     y += 57;
-    saltarSiHaceFalta(notas ? 68 : 48);
-    setDraw(borde);
-    setFill([241, 247, 255]);
-    doc.roundedRect(margen, y, ancho, 42, 4, 4, "FD");
+    newPageIfNeeded(notas ? 62 : 43);
+    fill(panel);
+    draw(line);
+    doc.roundedRect(contentX, y, contentW, 38, 5, 5, "FD");
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(9.5);
-    setColor(texto);
-    doc.text("Condiciones", 20, y + 9);
+    doc.setFontSize(9);
+    color(ink);
+    doc.text("Condiciones de atencion", 76, y + 10);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
+    doc.setFontSize(7.7);
     doc.setTextColor(71, 85, 105);
-    doc.text(`Valido por ${validez} dias desde su emision.`, 20, y + 17);
-    doc.text("El trabajo inicia o se reserva al confirmar el pago o adelanto coordinado.", 20, y + 23);
-    doc.text("Precios sujetos a disponibilidad de productos, repuestos o proveedor.", 20, y + 29);
-    doc.text("Garantia segun condiciones del servicio, producto o proveedor.", 20, y + 35);
+    doc.text(`Documento valido por ${validez} dias desde su emision.`, 76, y + 18);
+    doc.text("Precios sujetos a disponibilidad de productos, repuestos o proveedor.", 76, y + 25);
+    doc.text("El servicio se agenda despues de confirmar pago o adelanto coordinado.", 76, y + 32);
 
     if (notas) {
-      y += 42;
-      saltarSiHaceFalta(30);
+      y += 50;
+      newPageIfNeeded(32);
+      fill([236, 245, 255]);
+      draw(line);
+      doc.roundedRect(contentX, y, contentW, 28, 5, 5, "FD");
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(9.5);
-      setColor(texto);
-      doc.text("Notas", 20, y);
+      doc.setFontSize(9);
+      color(ink);
+      doc.text("Notas adicionales", 76, y + 9);
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(8.5);
+      doc.setFontSize(7.8);
       doc.setTextColor(71, 85, 105);
-      doc.text(doc.splitTextToSize(notas, 170), 20, y + 8);
+      doc.text(doc.splitTextToSize(notas, 112), 76, y + 17);
     }
 
     footer();

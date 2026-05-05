@@ -1095,6 +1095,69 @@ body {
 }
 
 @media (max-width: 1180px) {
+  .pos-layout {
+    flex-direction: column;
+  }
+
+  .pos-sidebar {
+    width: 100%;
+    height: auto;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 10px 16px;
+    padding: 14px 18px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+
+  .pos-sidebar .pos-logo {
+    grid-row: span 2;
+    width: 54px;
+    height: 54px;
+    margin: 0;
+  }
+
+  .pos-sidebar h2 {
+    font-size: 20px;
+  }
+
+  .pos-sidebar p {
+    margin: 0;
+  }
+
+  .pos-sidebar nav {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .pos-sidebar nav a,
+  .pos-sidebar nav button {
+    min-height: 48px;
+    text-align: center;
+    padding: 12px 10px;
+  }
+
+  .pos-main {
+    padding: 22px;
+  }
+
+  .pos-header {
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .pos-header h1 {
+    font-size: 30px;
+  }
+
+  .pos-header p {
+    font-size: 15px;
+  }
+
   .pos-content {
     grid-template-columns: 1fr;
   }
@@ -1106,6 +1169,38 @@ body {
   .productos-grid,
   .carrito-lista {
     max-height: none;
+  }
+
+  .pos-search-tools {
+    grid-template-columns: minmax(0, 1fr) 170px;
+    width: 100%;
+  }
+
+  .producto-card {
+    grid-template-columns: minmax(220px, 1.5fr) 0.8fr 0.55fr 0.7fr auto;
+  }
+}
+
+@media (min-width: 851px) and (max-width: 1180px) {
+  .pos-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .carrito-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 18px;
+  }
+
+  .cart-heading,
+  .carrito-lista {
+    grid-column: 1;
+  }
+
+  .carrito-total,
+  .metodo-pago-box,
+  .btn-cobrar {
+    grid-column: 2;
   }
 }
 

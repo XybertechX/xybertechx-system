@@ -419,17 +419,121 @@ textarea:focus {
 }
 
 @media (max-width: 1100px) {
+  .app {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+
+  .sidebar {
+    padding: 18px 14px;
+  }
+
+  .brand {
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .brand img {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+  }
+
+  .brand h1 {
+    font-size: 18px;
+  }
+
+  .brand span {
+    font-size: 10px;
+    letter-spacing: 3px;
+  }
+
+  .menu a,
+  .menu button {
+    min-height: 48px;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 14px;
+  }
+
+  .main {
+    padding: 22px;
+  }
+
+  .topbar {
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .topbar h2 {
+    font-size: 24px;
+  }
+
   .control-grid,
   .control-panels,
-  .inventory-summary,
   .quote-grid,
   .ceo-sale-grid {
     grid-template-columns: 1fr;
   }
 
+  .inventory-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .inventory-form,
+  .quote-form,
+  .quote-item-form,
+  .ceo-service-form,
+  .ceo-product-picker {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .inventory-form button,
+  .quote-item-form button,
+  .ceo-product-picker button {
+    min-height: 48px;
+  }
+
+  .inventory-row {
+    grid-template-columns: minmax(220px, 1.6fr) repeat(3, minmax(88px, 0.7fr));
+    align-items: start;
+  }
+
+  .inventory-row > div:nth-child(5),
+  .inventory-row > div:nth-child(6),
+  .inventory-row > div:nth-child(7) {
+    grid-column: span 1;
+  }
+
+  .inventory-row .actions {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    font-size: 16px;
+  }
+
   .control-hero {
     background:
       linear-gradient(135deg, rgba(37, 99, 235, 0.38), rgba(15, 23, 42, 0.9));
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1100px) {
+  .quote-page .control-side {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .quote-payment-card {
+    grid-column: span 2;
+  }
+
+  .compact-list li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
   }
 }
 
