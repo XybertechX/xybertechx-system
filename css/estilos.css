@@ -357,9 +357,25 @@
 
 .ceo-product-picker {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) 0.5fr auto auto;
+  grid-template-columns: 1fr;
   gap: 12px;
   margin-top: 14px;
+}
+
+.ceo-product-actions {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.7fr) minmax(120px, auto) minmax(110px, auto);
+  gap: 12px;
+  align-items: center;
+}
+
+.ceo-product-actions button,
+.ceo-product-actions input {
+  min-height: 52px;
+}
+
+.ceo-product-actions button {
+  padding-inline: 20px;
 }
 
 .product-combobox {
@@ -371,12 +387,21 @@
 .product-results {
   display: grid;
   gap: 8px;
-  max-height: 258px;
+  max-height: 220px;
   overflow: auto;
   padding: 8px;
   border: 1px solid rgba(96, 165, 250, 0.26);
   border-radius: 18px;
   background: rgba(2, 6, 23, 0.54);
+}
+
+.product-results::-webkit-scrollbar {
+  width: 8px;
+}
+
+.product-results::-webkit-scrollbar-thumb {
+  background: rgba(96, 165, 250, 0.55);
+  border-radius: 999px;
 }
 
 .product-option {
@@ -451,9 +476,9 @@
 
 .toolbar-controls {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) 170px;
+  grid-template-columns: minmax(220px, 1fr) 190px 170px;
   gap: 10px;
-  min-width: 420px;
+  min-width: 620px;
 }
 
 .inventory-list {
@@ -728,8 +753,15 @@ textarea:focus {
 
   .inventory-form button,
   .quote-item-form button,
-  .ceo-product-picker button {
+  .ceo-product-actions button {
     min-height: 48px;
+  }
+
+  .toolbar-controls,
+  .ceo-product-actions {
+    grid-template-columns: 1fr;
+    min-width: 0;
+    width: 100%;
   }
 
   .inventory-row {

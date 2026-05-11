@@ -11,6 +11,7 @@ import {
 
 const lista = document.getElementById("lista");
 const buscarInventario = document.getElementById("buscarInventario");
+const filtroCategoria = document.getElementById("filtroCategoria");
 const filtroInventario = document.getElementById("filtroInventario");
 const totalProductos = document.getElementById("totalProductos");
 const productosDisponibles = document.getElementById("productosDisponibles");
@@ -93,20 +94,46 @@ function actualizarResumen() {
 
 function productosFiltrados() {
   const texto = buscarInventario.value.trim().toLowerCase();
+  const categoriaActiva = filtroCategoria.value;
   const filtro = filtroInventario.value;
 
   return productos.filter((producto) => {
     const stock = Number(producto.stock || 0);
+    const categoria = producto.categoria || "Sin categoria";
     const coincideTexto = `${producto.nombre || ""} ${producto.categoria || ""}`
       .toLowerCase()
       .includes(texto);
+    const coincideCategoria = categoriaActiva === "todas" || categoria === categoriaActiva;
 
     if (!coincideTexto) return false;
+    if (!coincideCategoria) return false;
     if (filtro === "disponibles") return stock > 5;
     if (filtro === "bajo") return stock > 0 && stock <= 5;
     if (filtro === "agotados") return stock <= 0;
     return true;
   });
+}
+
+function actualizarCategorias() {
+  const categoriaActual = filtroCategoria.value || "todas";
+  const categorias = [...new Set(productos.map((p) => p.categoria || "Sin categoria"))]
+    .sort((a, b) => a.localeCompare(b));
+
+  filtroCategoria.innerHTML = "";
+
+  const todas = document.createElement("option");
+  todas.value = "todas";
+  todas.textContent = "Todas las categorias";
+  filtroCategoria.appendChild(todas);
+
+  categorias.forEach((categoria) => {
+    const option = document.createElement("option");
+    option.value = categoria;
+    option.textContent = categoria;
+    filtroCategoria.appendChild(option);
+  });
+
+  filtroCategoria.value = categorias.includes(categoriaActual) ? categoriaActual : "todas";
 }
 
 window.agregarProducto = async () => {
@@ -301,10 +328,12 @@ async function cargarProductos() {
 
   productos.sort((a, b) => Number(a.stock || 0) - Number(b.stock || 0));
   actualizarResumen();
+  actualizarCategorias();
   renderProductos();
 }
 
 buscarInventario.addEventListener("input", renderProductos);
+filtroCategoria.addEventListener("change", renderProductos);
 filtroInventario.addEventListener("change", renderProductos);
 cerrarModalProducto.addEventListener("click", () => modalProducto.classList.add("hidden"));
 guardarProductoEditado.addEventListener("click", guardarEdicionProducto);

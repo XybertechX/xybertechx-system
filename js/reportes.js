@@ -88,8 +88,11 @@ async function cargarReportes() {
 
   let totalPos = 0;
   let utilidadPos = 0;
+  let totalOperativo = 0;
+  let utilidadOperativa = 0;
   let inversion = 0;
   let cantidadPos = 0;
+  let cantidadOperativa = 0;
   let totalServiciosCeo = 0;
   let devoluciones = 0;
   let productosVendidos = {};
@@ -116,24 +119,32 @@ async function cargarReportes() {
       return;
     }
 
+    totalOperativo += totalVenta;
+    utilidadOperativa += utilidadVenta;
+    cantidadOperativa++;
+
+    if (!ventasPorDia[fecha]) ventasPorDia[fecha] = 0;
+    ventasPorDia[fecha] += totalVenta;
+
+    const metodo = venta.metodoPago || "No definido";
+    if (!metodos[metodo]) metodos[metodo] = { total: 0, cantidad: 0 };
+    metodos[metodo].total += totalVenta;
+    metodos[metodo].cantidad++;
+
+    (venta.productos || []).forEach((p) => {
+      const cantidad = Number(p.cantidad || 0);
+      const nombre = p.nombre || "Producto";
+      productosVendidos[nombre] = (productosVendidos[nombre] || 0) + cantidad;
+    });
+
     if (esPos) {
       totalPos += totalVenta;
       utilidadPos += utilidadVenta;
       cantidadPos++;
 
-      if (!ventasPorDia[fecha]) ventasPorDia[fecha] = 0;
-      ventasPorDia[fecha] += totalVenta;
-
-      const metodo = venta.metodoPago || "No definido";
-      if (!metodos[metodo]) metodos[metodo] = { total: 0, cantidad: 0 };
-      metodos[metodo].total += totalVenta;
-      metodos[metodo].cantidad++;
-
       (venta.productos || []).forEach((p) => {
         const cantidad = Number(p.cantidad || 0);
-        const nombre = p.nombre || "Producto";
         inversion += Number(p.costo || 0) * cantidad;
-        productosVendidos[nombre] = (productosVendidos[nombre] || 0) + cantidad;
       });
     } else {
       totalServiciosCeo += totalVenta;
@@ -142,14 +153,14 @@ async function cargarReportes() {
     historial.push({ venta, fecha, fechaDate, totalVenta, utilidadVenta, origen });
   });
 
-  totalVentas.textContent = dinero(totalPos);
-  cantidadVentas.textContent = `${cantidadPos} tickets`;
-  ticketPromedio.textContent = cantidadPos > 0 ? dinero(totalPos / cantidadPos) : "0.00";
-  totalUtilidad.textContent = dinero(utilidadPos);
+  totalVentas.textContent = dinero(totalOperativo);
+  cantidadVentas.textContent = `${cantidadOperativa} operaciones | POS ${cantidadPos}`;
+  ticketPromedio.textContent = cantidadOperativa > 0 ? dinero(totalOperativo / cantidadOperativa) : "0.00";
+  totalUtilidad.textContent = dinero(utilidadOperativa);
   totalInversion.textContent = dinero(inversion);
   totalCeo.textContent = dinero(totalServiciosCeo);
   totalDevoluciones.textContent = dinero(devoluciones);
-  margenPromedio.textContent = totalPos > 0 ? `${((utilidadPos / totalPos) * 100).toFixed(1)}%` : "0%";
+  margenPromedio.textContent = totalOperativo > 0 ? `${((utilidadOperativa / totalOperativo) * 100).toFixed(1)}%` : "0%";
   canalPrincipal.textContent = totalPos >= totalServiciosCeo ? "POS" : "CEO";
 
   reporteMetodosPago.innerHTML = "";
@@ -161,7 +172,7 @@ async function cargarReportes() {
 
   productosTopReporte.innerHTML = "";
   if (top.length === 0) {
-    agregarItem(productosTopReporte, "Sin ventas POS", "Aun no hay productos vendidos", "0 und.", "");
+    agregarItem(productosTopReporte, "Sin ventas registradas", "Aun no hay productos o repuestos vendidos", "0 und.", "");
     productoTop.textContent = "-";
   } else {
     productoTop.textContent = `${top[0][0]} (${top[0][1]} und.)`;
@@ -206,7 +217,7 @@ function crearGraficoVentas(ventasPorDia) {
     data: {
       labels,
       datasets: [{
-        label: "Ventas POS por dia (S/)",
+        label: "Cobros operativos por dia (S/)",
         data: valores,
         borderWidth: 3,
         tension: 0.35
