@@ -17,8 +17,16 @@ const margenPromedio = document.getElementById("margenPromedio");
 const canalPrincipal = document.getElementById("canalPrincipal");
 const reporteMetodosPago = document.getElementById("reporteMetodosPago");
 const productosTopReporte = document.getElementById("productosTopReporte");
+const modalVenta = document.getElementById("modalVenta");
+const cerrarDetalleVenta = document.getElementById("cerrarDetalleVenta");
+const detalleVentaTitulo = document.getElementById("detalleVentaTitulo");
+const detalleVentaSubtitulo = document.getElementById("detalleVentaSubtitulo");
+const detalleVentaResumen = document.getElementById("detalleVentaResumen");
+const detalleVentaProductos = document.getElementById("detalleVentaProductos");
+const detalleVentaNotas = document.getElementById("detalleVentaNotas");
 
 const metodosBase = ["Efectivo", "Yape", "Plin", "Transferencia", "Tarjeta"];
+let ventasDetalle = [];
 
 function fechaComoDate(fecha) {
   if (!fecha) return null;
@@ -41,8 +49,21 @@ function origenVenta(venta) {
   return venta.origen || "Admin";
 }
 
-function agregarItem(lista, titulo, detalle, valor, badge) {
+function agregarItem(lista, titulo, detalle, valor, badge, onClick) {
   const li = document.createElement("li");
+  if (onClick) {
+    li.className = "clickable-sale";
+    li.tabIndex = 0;
+    li.setAttribute("role", "button");
+    li.setAttribute("aria-label", `Ver detalle de ${titulo}`);
+    li.onclick = onClick;
+    li.onkeydown = (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        onClick();
+      }
+    };
+  }
 
   const texto = document.createElement("div");
   const strong = document.createElement("strong");
@@ -66,6 +87,64 @@ function agregarItem(lista, titulo, detalle, valor, badge) {
 
   li.append(texto, derecha);
   lista.appendChild(li);
+}
+
+function crearDatoDetalle(label, valor) {
+  const div = document.createElement("div");
+  const span = document.createElement("span");
+  span.textContent = label;
+  const strong = document.createElement("strong");
+  strong.textContent = valor;
+  div.append(span, strong);
+  return div;
+}
+
+function abrirDetalleVenta(id) {
+  const item = ventasDetalle.find((registro) => registro.venta.id === id);
+  if (!item) return;
+
+  const { venta, fechaDate, totalVenta, utilidadVenta, origen } = item;
+  const productos = venta.productos || [];
+  const fechaCompleta = fechaDate && fechaDate.getTime() > 0
+    ? `${fechaDate.toLocaleDateString("es-PE")} ${fechaDate.toLocaleTimeString("es-PE")}`
+    : "Sin fecha";
+
+  detalleVentaTitulo.textContent = `${origen} | S/${dinero(totalVenta)}`;
+  detalleVentaSubtitulo.textContent = venta.cliente || venta.usuario || "Movimiento operativo";
+
+  detalleVentaResumen.innerHTML = "";
+  detalleVentaResumen.append(
+    crearDatoDetalle("Fecha", fechaCompleta),
+    crearDatoDetalle("Canal", origen),
+    crearDatoDetalle("Metodo", venta.metodoPago || "Sin metodo"),
+    crearDatoDetalle("Estado", venta.estado || "completada"),
+    crearDatoDetalle("Total", `S/${dinero(totalVenta)}`),
+    crearDatoDetalle("Utilidad", `S/${dinero(utilidadVenta)}`),
+    crearDatoDetalle("Cliente", venta.cliente || "Sin cliente"),
+    crearDatoDetalle("Documento", venta.id)
+  );
+
+  detalleVentaProductos.innerHTML = "";
+  if (productos.length === 0) {
+    agregarItem(detalleVentaProductos, "Sin productos", "La venta no guarda detalle de items.", "0 und.", "");
+  } else {
+    productos.forEach((producto) => {
+      const cantidad = Number(producto.cantidad || 0);
+      const subtotalGuardado = producto.subtotal ?? producto.total;
+      const precio = Number(producto.precio ?? (cantidad > 0 && subtotalGuardado ? Number(subtotalGuardado) / cantidad : 0));
+      const subtotal = Number(subtotalGuardado ?? (precio * cantidad));
+      agregarItem(
+        detalleVentaProductos,
+        producto.nombre || "Producto",
+        `${producto.categoria || "Sin categoria"} | x${cantidad}`,
+        `S/${dinero(subtotal)}`,
+        `Unit. S/${dinero(precio)}`
+      );
+    });
+  }
+
+  detalleVentaNotas.textContent = venta.nota || venta.observacion || venta.comentario || "Sin notas registradas.";
+  modalVenta.classList.remove("hidden");
 }
 
 function renderMetodo(nombre, total, cantidad) {
@@ -181,6 +260,7 @@ async function cargarReportes() {
     });
   }
 
+  ventasDetalle = historial;
   historialVentas.innerHTML = "";
   historial
     .sort((a, b) => b.fechaDate - a.fechaDate)
@@ -194,7 +274,8 @@ async function cargarReportes() {
         productos || "Venta sin detalle",
         `${fecha} - ${origen}`,
         `S/${dinero(totalVenta)} | U: S/${dinero(utilidadVenta)}`,
-        origen
+        origen,
+        () => abrirDetalleVenta(venta.id)
       );
     });
 
@@ -204,6 +285,13 @@ async function cargarReportes() {
 
   crearGraficoVentas(ventasPorDia);
 }
+
+cerrarDetalleVenta.addEventListener("click", () => modalVenta.classList.add("hidden"));
+modalVenta.addEventListener("click", (event) => {
+  if (event.target === modalVenta) {
+    modalVenta.classList.add("hidden");
+  }
+});
 
 function crearGraficoVentas(ventasPorDia) {
   const canvas = document.getElementById("graficoVentas");

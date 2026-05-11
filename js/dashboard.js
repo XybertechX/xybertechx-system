@@ -11,6 +11,7 @@ const ticketsHoy = document.getElementById("ticketsHoy");
 const stockBajoSpan = document.getElementById("stockBajo");
 const stockAgotadoSpan = document.getElementById("stockAgotado");
 const ventasCeoHoy = document.getElementById("ventasCeoHoy");
+const serviciosCeoCount = document.getElementById("serviciosCeoCount");
 const ultimasVentas = document.getElementById("ultimasVentas");
 const inventarioCritico = document.getElementById("inventarioCritico");
 const metodosPagoResumen = document.getElementById("metodosPagoResumen");
@@ -110,6 +111,7 @@ async function cargarDashboard() {
   let gananciaHoy = 0;
   let cantidadVentas = 0;
   let totalCeoHoy = 0;
+  let cantidadCeoHoy = 0;
   let devolucionesHoy = 0;
   let operacionesDevueltas = 0;
 
@@ -137,7 +139,7 @@ async function cargarDashboard() {
     const utilidad = Number(venta.utilidad ?? venta.ganancia ?? 0);
     const devuelta = venta.estado === "devuelta";
 
-    if (esPos && mismaFecha(fechaVenta, fechaAyer) && !devuelta) {
+    if (mismaFecha(fechaVenta, fechaAyer) && !devuelta) {
       ventasAyer += total;
     }
 
@@ -149,32 +151,32 @@ async function cargarDashboard() {
       return;
     }
 
-    if (esPos) {
-      ventasHoy += total;
-      gananciaHoy += utilidad;
-      cantidadVentas++;
+    ventasHoy += total;
+    gananciaHoy += utilidad;
+    cantidadVentas++;
 
-      const metodo = venta.metodoPago || "No definido";
-      if (!metodos[metodo]) {
-        metodos[metodo] = { total: 0, cantidad: 0 };
-      }
-      metodos[metodo].total += total;
-      metodos[metodo].cantidad++;
-
-      (venta.productos || []).forEach((producto) => {
-        const nombre = producto.nombre || "Producto";
-        if (!productosVendidos[nombre]) {
-          productosVendidos[nombre] = 0;
-        }
-
-        productosVendidos[nombre] += Number(producto.cantidad || 0);
-      });
-
-      ventasRecientes.push({ venta, fechaVenta });
-      return;
+    const metodo = venta.metodoPago || "No definido";
+    if (!metodos[metodo]) {
+      metodos[metodo] = { total: 0, cantidad: 0 };
     }
+    metodos[metodo].total += total;
+    metodos[metodo].cantidad++;
 
-    totalCeoHoy += total;
+    (venta.productos || []).forEach((producto) => {
+      const nombre = producto.nombre || "Producto";
+      if (!productosVendidos[nombre]) {
+        productosVendidos[nombre] = 0;
+      }
+
+      productosVendidos[nombre] += Number(producto.cantidad || 0);
+    });
+
+    ventasRecientes.push({ venta, fechaVenta, origen });
+
+    if (!esPos) {
+      totalCeoHoy += total;
+      cantidadCeoHoy++;
+    }
   });
 
   inventarioSnap.forEach((docu) => {
@@ -198,6 +200,7 @@ async function cargarDashboard() {
   stockBajoSpan.textContent = stockBajo.length;
   stockAgotadoSpan.textContent = stockAgotado.length;
   ventasCeoHoy.textContent = dinero(totalCeoHoy);
+  serviciosCeoCount.textContent = cantidadCeoHoy;
   ventasAyerSpan.textContent = dinero(ventasAyer);
   diferenciaVentasSpan.textContent = dinero(ventasHoy - ventasAyer);
   devolucionesHoySpan.textContent = dinero(devolucionesHoy);
@@ -207,11 +210,11 @@ async function cargarDashboard() {
   variacionVentasSpan.textContent = ventasAyer > 0 ? `${variacion.toFixed(1)}% vs ayer` : "Sin base ayer";
 
   if (ventasHoy <= 0) {
-    mensajeVentas.textContent = "Aun no hay ventas POS registradas hoy.";
+    mensajeVentas.textContent = "Aun no hay operaciones registradas hoy.";
   } else if (ventasHoy < metaDiaria) {
-    mensajeVentas.textContent = `POS activo. Faltan S/${dinero(metaDiaria - ventasHoy)} para la meta diaria.`;
+    mensajeVentas.textContent = `Caja activa. Faltan S/${dinero(metaDiaria - ventasHoy)} para la meta diaria.`;
   } else {
-    mensajeVentas.textContent = "Meta diaria cubierta desde el POS.";
+    mensajeVentas.textContent = "Meta diaria cubierta con la caja operativa.";
   }
 
   limpiarLista(metodosPagoResumen);
@@ -239,21 +242,21 @@ async function cargarDashboard() {
   ventasRecientes
     .sort((a, b) => b.fechaVenta - a.fechaVenta)
     .slice(0, 6)
-    .forEach(({ venta, fechaVenta }) => {
+    .forEach(({ venta, fechaVenta, origen }) => {
       const productos = (venta.productos || [])
         .map((producto) => `${producto.nombre || "Producto"} x${producto.cantidad || 0}`)
         .join(", ");
       agregarItemSimple(
         ultimasVentas,
-        productos || "Venta POS",
+        productos || "Venta sin detalle",
         `${fechaVenta.toLocaleTimeString()} - ${venta.metodoPago || "Sin metodo"}`,
         `S/${dinero(venta.total)}`,
-        "POS"
+        origen
       );
     });
 
   if (ventasRecientes.length === 0) {
-    agregarVacio(ultimasVentas, "Todavia no hay movimiento POS hoy.");
+    agregarVacio(ultimasVentas, "Todavia no hay movimiento de caja hoy.");
   }
 
   limpiarLista(productosTop);
@@ -262,7 +265,7 @@ async function cargarDashboard() {
     .slice(0, 5);
 
   if (top.length === 0) {
-    agregarVacio(productosTop, "Sin productos vendidos por POS hoy.");
+    agregarVacio(productosTop, "Sin productos vendidos hoy.");
   } else {
     top.forEach(([nombre, cantidad], index) => {
       agregarItemSimple(productosTop, nombre, `Puesto ${index + 1}`, `${cantidad} und.`, "Top");

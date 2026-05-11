@@ -136,6 +136,30 @@
 
 </div>
 
+<div id="modalVenta" class="modal hidden">
+  <div class="modal-box sale-detail-modal">
+    <div class="panel-heading">
+      <div>
+        <h3 id="detalleVentaTitulo">Detalle de venta</h3>
+        <p id="detalleVentaSubtitulo">Informacion completa del movimiento.</p>
+      </div>
+      <button type="button" class="btn-danger" id="cerrarDetalleVenta">Cerrar</button>
+    </div>
+
+    <div class="sale-detail-grid" id="detalleVentaResumen"></div>
+
+    <div class="detail-section">
+      <h4>Productos / servicios</h4>
+      <ul class="compact-list" id="detalleVentaProductos"></ul>
+    </div>
+
+    <div class="detail-section">
+      <h4>Notas</h4>
+      <p id="detalleVentaNotas">Sin notas registradas.</p>
+    </div>
+  </div>
+</div>
+
 <script type="module" src="js/auth.js"></script>
 <script type="module" src="js/logout.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

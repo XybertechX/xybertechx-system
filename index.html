@@ -45,18 +45,18 @@
     <section class="control-grid">
       <div class="control-hero">
         <div>
-          <span class="eyebrow">Caja POS de hoy</span>
+          <span class="eyebrow">Caja de hoy</span>
           <h1>S/ <span id="ventasHoy">0.00</span></h1>
           <p id="mensajeVentas">Calculando estado del dia...</p>
         </div>
 
         <div class="hero-metrics">
           <div>
-            <span>Ganancia POS</span>
+            <span>Ganancia total</span>
             <strong>S/ <span id="gananciaHoy">0.00</span></strong>
           </div>
           <div>
-            <span>Tickets POS</span>
+            <span>Operaciones</span>
             <strong id="ticketsHoy">0</strong>
           </div>
           <div>
@@ -82,7 +82,7 @@
         <div class="mini-card">
           <span>Servicios CEO hoy</span>
           <strong>S/ <span id="ventasCeoHoy">0.00</span></strong>
-          <small>Canal separado del POS</small>
+          <small><span id="serviciosCeoCount">0</span> servicios registrados</small>
         </div>
       </aside>
     </section>
@@ -91,8 +91,8 @@
       <div class="card control-panel">
         <div class="panel-heading">
           <div>
-            <h3>Metodos de pago POS</h3>
-            <p>Caja diaria por canal de cobro.</p>
+            <h3>Metodos de pago</h3>
+            <p>Caja diaria POS y CEO por canal de cobro.</p>
           </div>
           <span id="ventasNetasLabel">Completadas</span>
         </div>
@@ -115,10 +115,10 @@
       <div class="card control-panel">
         <div class="panel-heading">
           <div>
-            <h3>Ultimas ventas POS</h3>
-            <p>Movimiento reciente de caja.</p>
+            <h3>Ultimas operaciones</h3>
+            <p>Movimiento reciente de POS y servicios CEO.</p>
           </div>
-          <a href="pos/historial.html">Historial</a>
+          <a href="reportes.html">Ver detalle</a>
         </div>
         <ul class="compact-list" id="ultimasVentas"></ul>
       </div>
@@ -127,7 +127,7 @@
         <div class="panel-heading">
           <div>
             <h3>Productos top</h3>
-            <p>Mas vendidos por POS hoy.</p>
+            <p>Mas vendidos por POS y CEO hoy.</p>
           </div>
           <span id="variacionVentas">0%</span>
         </div>
@@ -139,17 +139,17 @@
       <div class="panel-heading">
         <div>
           <h3>Comparacion operativa</h3>
-          <p>El POS manda el centro de control. Ventas CEO y boletas quedan como canales auxiliares.</p>
+          <p>Lectura rapida de caja operativa, POS, CEO y devoluciones.</p>
         </div>
       </div>
 
       <div class="comparison-grid">
         <div>
-          <span>POS ayer</span>
+          <span>Caja ayer</span>
           <strong>S/ <span id="ventasAyer">0.00</span></strong>
         </div>
         <div>
-          <span>Diferencia POS</span>
+          <span>Diferencia caja</span>
           <strong>S/ <span id="diferenciaVentas">0.00</span></strong>
         </div>
         <div>
